@@ -26,6 +26,90 @@ GRIS_FONDO    = "#F4F6F9"
 GRIS_BORDE    = "#D0D7E3"
 NARANJA_ALERTA = "#FF6B2B"
 TEXTO_OSCURO  = "#1A2340"
+AMARILLO_SUGE = "#FFF9E6"
+
+# ─────────────────────────────────────────────
+#  Diccionario de estados mexicanos
+#  Mapea abreviaturas y variantes → nombre canónico
+# ─────────────────────────────────────────────
+ESTADOS_MEXICO = {
+    # Aguascalientes
+    "ags": "Aguascalientes", "aguascalientes": "Aguascalientes",
+    # Baja California
+    "bc": "Baja California", "baja california": "Baja California",
+    "bajacalifornia": "Baja California",
+    # Baja California Sur
+    "bcs": "Baja California Sur", "baja california sur": "Baja California Sur",
+    "bajacaliforniasur": "Baja California Sur",
+    # Campeche
+    "camp": "Campeche", "campeche": "Campeche",
+    # Chiapas
+    "chis": "Chiapas", "chiapas": "Chiapas", "chps": "Chiapas",
+    # Chihuahua
+    "chih": "Chihuahua", "chihuahua": "Chihuahua",
+    # Ciudad de México
+    "cdmx": "Ciudad de Mexico", "ciudad de mexico": "Ciudad de Mexico",
+    "ciudad de méxico": "Ciudad de Mexico", "df": "Ciudad de Mexico",
+    "distrito federal": "Ciudad de Mexico", "distritofederal": "Ciudad de Mexico",
+    # Coahuila
+    "coah": "Coahuila", "coahuila": "Coahuila",
+    "coahuila de zaragoza": "Coahuila",
+    # Colima
+    "col": "Colima", "colima": "Colima",
+    # Durango
+    "dgo": "Durango", "durango": "Durango", "dur": "Durango",
+    # Guanajuato
+    "gto": "Guanajuato", "guanajuato": "Guanajuato",
+    # Guerrero
+    "gro": "Guerrero", "guerrero": "Guerrero",
+    # Hidalgo
+    "hgo": "Hidalgo", "hidalgo": "Hidalgo",
+    # Jalisco
+    "jal": "Jalisco", "jalisco": "Jalisco",
+    # Estado de México
+    "edomex": "Estado de Mexico", "estado de mexico": "Estado de Mexico",
+    "estado de méxico": "Estado de Mexico", "mex": "Estado de Mexico",
+    "edo mex": "Estado de Mexico", "edo. mex.": "Estado de Mexico",
+    # Michoacán
+    "mich": "Michoacan", "michoacan": "Michoacan",
+    "michoacán": "Michoacan", "michoacan de ocampo": "Michoacan",
+    # Morelos
+    "mor": "Morelos", "morelos": "Morelos",
+    # Nayarit
+    "nay": "Nayarit", "nayarit": "Nayarit",
+    # Nuevo León
+    "nl": "Nuevo Leon", "nle": "Nuevo Leon", "nuevo leon": "Nuevo Leon",
+    "nuevo león": "Nuevo Leon",
+    # Oaxaca
+    "oax": "Oaxaca", "oaxaca": "Oaxaca",
+    # Puebla
+    "pue": "Puebla", "puebla": "Puebla",
+    # Querétaro
+    "qro": "Queretaro", "queretaro": "Queretaro", "querétaro": "Queretaro",
+    # Quintana Roo
+    "qroo": "Quintana Roo", "quintana roo": "Quintana Roo",
+    "quintanaroo": "Quintana Roo",
+    # San Luis Potosí
+    "slp": "San Luis Potosi", "san luis potosi": "San Luis Potosi",
+    "san luis potosí": "San Luis Potosi",
+    # Sinaloa
+    "sin": "Sinaloa", "sinaloa": "Sinaloa",
+    # Sonora
+    "son": "Sonora", "sonora": "Sonora",
+    # Tabasco
+    "tab": "Tabasco", "tabasco": "Tabasco",
+    # Tamaulipas
+    "tamps": "Tamaulipas", "tamaulipas": "Tamaulipas", "tam": "Tamaulipas",
+    # Tlaxcala
+    "tlax": "Tlaxcala", "tlaxcala": "Tlaxcala",
+    # Veracruz
+    "ver": "Veracruz", "veracruz": "Veracruz",
+    "veracruz de ignacio de la llave": "Veracruz",
+    # Yucatán
+    "yuc": "Yucatan", "yucatan": "Yucatan", "yucatán": "Yucatan",
+    # Zacatecas
+    "zac": "Zacatecas", "zacatecas": "Zacatecas",
+}
 
 
 class DSSVacunacionApp:
@@ -41,6 +125,9 @@ class DSSVacunacionApp:
         self.cols_estructuradas = []
         self.cols_no_estructuradas = []
         self.pantalla_actual = None
+        self.archivos_no_estructurados = []
+        self.resumen_homogeneizacion = {}
+        self.contenido_archivos_externos = {}
 
         self._construir_ui()
 
@@ -252,6 +339,49 @@ class DSSVacunacionApp:
         )
         self.btn_extraer.pack(pady=(10, 15))
         self._hover(self.btn_extraer, VERDE_SALUD, "#005C3D")
+
+        # Card de archivos no estructurados adicionales
+        card_ne = tk.Frame(center, bg=BLANCO, relief="flat",
+                           highlightbackground=GRIS_BORDE, highlightthickness=1)
+        card_ne.pack(fill="x", padx=40, pady=(0, 15))
+
+        card_ne_inner = tk.Frame(card_ne, bg=BLANCO)
+        card_ne_inner.pack(padx=30, pady=15)
+
+        tk.Label(
+            card_ne_inner,
+            text="Archivos no estructurados adicionales (opcional):",
+            font=("Segoe UI", 9, "bold"),
+            bg=BLANCO, fg=TEXTO_OSCURO
+        ).pack(anchor="w")
+
+        tk.Label(
+            card_ne_inner,
+            text="Agrega archivos TXT, JSON o PDF como fuentes complementarias",
+            font=("Segoe UI", 8),
+            bg=BLANCO, fg="#7A8499"
+        ).pack(anchor="w", pady=(2, 8))
+
+        btn_ne = tk.Button(
+            card_ne_inner,
+            text="Agregar archivos no estructurados...",
+            font=("Segoe UI", 9),
+            bg="#E8ECF3", fg=TEXTO_OSCURO,
+            relief="flat", cursor="hand2",
+            padx=15, pady=6,
+            command=self.explorar_archivos_no_estructurados
+        )
+        btn_ne.pack(fill="x")
+        self._hover(btn_ne, "#E8ECF3", "#D0D7E3")
+
+        self.lbl_archivos_ne = tk.Label(
+            card_ne_inner,
+            text="Ningun archivo adicional seleccionado",
+            font=("Segoe UI", 8),
+            bg=BLANCO, fg="#7A8499",
+            wraplength=400, justify="left", anchor="w"
+        )
+        self.lbl_archivos_ne.pack(fill="x", pady=(5, 0))
 
         # Barra de progreso
         self.progreso_extraer = ttk.Progressbar(center, mode="indeterminate",
@@ -485,6 +615,37 @@ class DSSVacunacionApp:
         )
         self.txt_no_estructurado.pack(fill="both", expand=True, padx=15, pady=(5, 10))
 
+        # ── Panel de sugerencias de fuentes de datos ──
+        card_sugerencias = tk.Frame(frame, bg=AMARILLO_SUGE, relief="flat",
+                                     highlightbackground="#E6D990", highlightthickness=1)
+        card_sugerencias.pack(fill="x", padx=15, pady=(5, 5))
+
+        sug_inner = tk.Frame(card_sugerencias, bg=AMARILLO_SUGE)
+        sug_inner.pack(fill="x", padx=15, pady=10)
+
+        tk.Label(
+            sug_inner,
+            text="Sugerencias de fuentes de datos no estructurados",
+            font=("Segoe UI", 10, "bold"),
+            bg=AMARILLO_SUGE, fg="#7A6800"
+        ).pack(anchor="w")
+
+        sugerencias_texto = (
+            "  - Reportes de la OMS/WHO sobre cobertura de vacunacion\n"
+            "  - Boletines epidemiologicos del SINAVE (Sistema Nacional de Vigilancia Epidemiologica)\n"
+            "  - Noticias y comunicados sobre campanas de vacunacion en Mexico\n"
+            "  - Informes del Programa de Vacunacion Universal (PVU)\n"
+            "  - Comunicados y alertas de COFEPRIS\n"
+            "  - Reportes estatales de la Secretaria de Salud de Oaxaca"
+        )
+        tk.Label(
+            sug_inner,
+            text=sugerencias_texto,
+            font=("Segoe UI", 9),
+            bg=AMARILLO_SUGE, fg="#5C5500",
+            justify="left", anchor="w"
+        ).pack(anchor="w", pady=(5, 0))
+
         # ── Estadísticas rápidas en la parte inferior ──
         stats_bar = tk.Frame(frame, bg="#E8ECF3", height=30)
         stats_bar.pack(fill="x", padx=15, pady=(0, 5))
@@ -542,6 +703,27 @@ class DSSVacunacionApp:
                     self.combo_hoja.current(0)
                 except Exception as e:
                     messagebox.showerror("Error", f"No se pudo leer el archivo:\n{e}")
+
+    def explorar_archivos_no_estructurados(self):
+        rutas = filedialog.askopenfilenames(
+            title="Seleccionar archivos no estructurados",
+            filetypes=[
+                ("Archivos soportados", "*.txt *.json *.pdf"),
+                ("Texto", "*.txt"),
+                ("JSON", "*.json"),
+                ("PDF", "*.pdf"),
+                ("Todos los archivos", "*.*")
+            ],
+            initialdir=os.path.expanduser("~/Documents")
+        )
+        if rutas:
+            self.archivos_no_estructurados = list(rutas)
+            nombres = [os.path.basename(r) for r in rutas]
+            self.lbl_archivos_ne.config(
+                text=f"{len(rutas)} archivo(s): {', '.join(nombres)}",
+                fg=VERDE_SALUD
+            )
+            self._set_status(f"{len(rutas)} archivo(s) no estructurado(s) seleccionado(s)")
 
     def ejecutar_extraccion(self):
         if not self.archivo_cargado:
@@ -663,6 +845,103 @@ class DSSVacunacionApp:
                 estructuradas.append(col)
         return estructuradas, no_estructuradas
 
+    def _homogeneizar_datos(self):
+        """Normaliza abreviaturas de estados mexicanos y limpia texto."""
+        resumen = {}
+        if self.df is None:
+            return resumen
+
+        for col in self.df.columns:
+            if col == "_hoja":
+                continue
+            if self.df[col].dtype != "object":
+                continue
+
+            # Limpieza básica: strip y colapsar espacios múltiples
+            antes = self.df[col].copy()
+            self.df[col] = self.df[col].astype(str).str.strip()
+            self.df[col] = self.df[col].str.replace(r'\s+', ' ', regex=True)
+            self.df[col] = self.df[col].replace("nan", pd.NA)
+
+            espacios_limpiados = (antes.astype(str) != self.df[col].astype(str)).sum()
+
+            # Detectar si es columna de estados: >30% de valores únicos coinciden
+            valores_unicos = self.df[col].dropna().str.lower().str.strip().unique()
+            if len(valores_unicos) == 0:
+                continue
+
+            coincidencias = sum(1 for v in valores_unicos if v in ESTADOS_MEXICO)
+            ratio = coincidencias / len(valores_unicos)
+
+            estados_normalizados = 0
+            if ratio > 0.3:
+                # Aplicar normalización de estados
+                def normalizar_estado(val):
+                    if pd.isna(val):
+                        return val
+                    key = str(val).lower().strip()
+                    return ESTADOS_MEXICO.get(key, val)
+
+                antes_norm = self.df[col].copy()
+                self.df[col] = self.df[col].apply(normalizar_estado)
+                estados_normalizados = (antes_norm != self.df[col]).sum()
+
+            if espacios_limpiados > 0 or estados_normalizados > 0:
+                resumen[col] = {
+                    "espacios_limpiados": int(espacios_limpiados),
+                    "estados_normalizados": int(estados_normalizados)
+                }
+
+        self.resumen_homogeneizacion = resumen
+        return resumen
+
+    def _cargar_archivos_no_estructurados(self):
+        """Lee contenido de archivos TXT, JSON y PDF seleccionados."""
+        self.contenido_archivos_externos = {}
+
+        for ruta in self.archivos_no_estructurados:
+            nombre = os.path.basename(ruta)
+            ext = os.path.splitext(ruta)[1].lower()
+            try:
+                if ext == ".txt":
+                    encodings = ["utf-8", "utf-8-sig", "latin-1", "cp1252"]
+                    contenido = None
+                    for enc in encodings:
+                        try:
+                            with open(ruta, "r", encoding=enc) as f:
+                                contenido = f.read()
+                            break
+                        except (UnicodeDecodeError, Exception):
+                            continue
+                    if contenido is None:
+                        contenido = "[Error: no se pudo leer el archivo con los encodings disponibles]"
+                    self.contenido_archivos_externos[nombre] = contenido
+
+                elif ext == ".json":
+                    import json
+                    with open(ruta, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    self.contenido_archivos_externos[nombre] = json.dumps(data, indent=2, ensure_ascii=False)
+
+                elif ext == ".pdf":
+                    try:
+                        from PyPDF2 import PdfReader
+                        reader = PdfReader(ruta)
+                        texto = ""
+                        for page in reader.pages:
+                            texto += page.extract_text() or ""
+                            texto += "\n"
+                        self.contenido_archivos_externos[nombre] = texto if texto.strip() else "[PDF sin texto extraible]"
+                    except ImportError:
+                        self.contenido_archivos_externos[nombre] = (
+                            "[PyPDF2 no esta instalado. Ejecuta: pip install PyPDF2]"
+                        )
+                else:
+                    self.contenido_archivos_externos[nombre] = "[Formato no soportado]"
+
+            except Exception as e:
+                self.contenido_archivos_externos[nombre] = f"[Error al leer: {e}]"
+
     def _iniciar_transformacion(self):
         self.mostrar_pantalla("transformar")
         self.progreso_transformar["value"] = 0
@@ -676,17 +955,26 @@ class DSSVacunacionApp:
 
     def _proceso_transformacion(self):
         pasos = [
-            (15, "Clasificando columnas por tipo de dato..."),
-            (35, "Detectando texto libre y comentarios..."),
-            (55, "Separando datos estructurados de no estructurados..."),
-            (75, "Limpiando valores nulos..."),
-            (90, "Generando resumen de transformacion..."),
+            (10, "Clasificando columnas por tipo de dato..."),
+            (25, "Detectando texto libre y comentarios..."),
+            (40, "Separando datos estructurados de no estructurados..."),
+            (55, "Homogeneizando datos (estados, espacios)..."),
+            (70, "Cargando archivos no estructurados..."),
+            (85, "Limpiando valores nulos..."),
+            (95, "Generando resumen de transformacion..."),
             (100, "Transformacion completada"),
         ]
 
-        for valor, texto in pasos:
+        for idx, (valor, texto) in enumerate(pasos):
             self.root.after(0, lambda v=valor, t=texto: self._actualizar_progreso_transformar(v, t))
-            time.sleep(0.7)
+            time.sleep(0.5)
+
+            # Ejecutar homogeneización en su paso
+            if idx == 3:
+                self._homogeneizar_datos()
+            # Cargar archivos no estructurados en su paso
+            elif idx == 4:
+                self._cargar_archivos_no_estructurados()
 
         # Clasificar columnas
         self.cols_estructuradas, self.cols_no_estructuradas = self._clasificar_columnas(self.df)
@@ -704,6 +992,23 @@ class DSSVacunacionApp:
             resultado += f"   - {c} (promedio {avg:.0f} caracteres)\n"
         resultado += f"\nValores nulos detectados: {nulos_total:,}\n"
         resultado += f"Total de registros procesados: {len(self.df):,}"
+
+        # Resumen de homogeneización
+        if self.resumen_homogeneizacion:
+            resultado += f"\n\nHOMOGENEIZACION DE DATOS:\n"
+            for col, info in self.resumen_homogeneizacion.items():
+                detalles = []
+                if info["espacios_limpiados"] > 0:
+                    detalles.append(f"{info['espacios_limpiados']} espacios limpiados")
+                if info["estados_normalizados"] > 0:
+                    detalles.append(f"{info['estados_normalizados']} estados normalizados")
+                resultado += f"   - {col}: {', '.join(detalles)}\n"
+
+        # Resumen de archivos externos
+        if self.contenido_archivos_externos:
+            resultado += f"\nARCHIVOS EXTERNOS CARGADOS: {len(self.contenido_archivos_externos)}\n"
+            for nombre in self.contenido_archivos_externos:
+                resultado += f"   - {nombre}\n"
 
         self.root.after(0, lambda: self._transformacion_completada(resultado))
 
@@ -785,6 +1090,22 @@ class DSSVacunacionApp:
                         self.txt_no_estructurado.insert("end",
                             f"  [{col}]: {valor}\n")
                 self.txt_no_estructurado.insert("end", "\n")
+
+        # Mostrar contenido de archivos externos cargados
+        if self.contenido_archivos_externos:
+            self.txt_no_estructurado.insert("end",
+                "\n" + "=" * 60 + "\n"
+                "  ARCHIVOS EXTERNOS NO ESTRUCTURADOS\n"
+                "=" * 60 + "\n\n")
+            for nombre, contenido in self.contenido_archivos_externos.items():
+                self.txt_no_estructurado.insert("end", f"--- {nombre} ---\n")
+                # Limitar preview a 5000 caracteres por archivo
+                if len(contenido) > 5000:
+                    self.txt_no_estructurado.insert("end", contenido[:5000])
+                    self.txt_no_estructurado.insert("end",
+                        f"\n\n[... truncado, {len(contenido):,} caracteres totales ...]\n\n")
+                else:
+                    self.txt_no_estructurado.insert("end", contenido + "\n\n")
 
         self.txt_no_estructurado.config(state="disabled")
 
@@ -878,6 +1199,18 @@ class DSSVacunacionApp:
                 avg_len = self.df[col].dropna().astype(str).str.len().mean()
                 f.write(f"  - {col:<30} Tipo: {dtype:<12} Nulos: {nulos}  Longitud promedio: {avg_len:.0f}\n")
 
+            # Sección de homogeneización
+            if self.resumen_homogeneizacion:
+                f.write(f"\nHOMOGENEIZACION DE DATOS:\n")
+                for col, info in self.resumen_homogeneizacion.items():
+                    detalles = []
+                    if info["espacios_limpiados"] > 0:
+                        detalles.append(f"{info['espacios_limpiados']} espacios limpiados")
+                    if info["estados_normalizados"] > 0:
+                        detalles.append(f"{info['estados_normalizados']} estados normalizados")
+                    f.write(f"  - {col}: {', '.join(detalles)}\n")
+                f.write("\n")
+
             f.write("\nESTADISTICAS NUMERICAS:\n")
             try:
                 desc = self.df.describe(include="all").to_string()
@@ -894,6 +1227,18 @@ class DSSVacunacionApp:
                         valor = fila[col]
                         if pd.notna(valor) and str(valor).strip():
                             f.write(f"  [{col}]: {valor}\n")
+
+            # Sección de archivos externos
+            if self.contenido_archivos_externos:
+                f.write(f"\n\nARCHIVOS EXTERNOS NO ESTRUCTURADOS:\n")
+                f.write("=" * 60 + "\n")
+                for nombre, contenido in self.contenido_archivos_externos.items():
+                    f.write(f"\n--- {nombre} ---\n")
+                    if len(contenido) > 5000:
+                        f.write(contenido[:5000])
+                        f.write(f"\n[... truncado, {len(contenido):,} caracteres totales ...]\n")
+                    else:
+                        f.write(contenido + "\n")
 
         self._set_status(f"Reporte generado: {os.path.basename(ruta)}")
         messagebox.showinfo("Reporte generado", f"Reporte guardado en:\n{ruta}")
