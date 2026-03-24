@@ -13,6 +13,9 @@ import os
 import threading
 import time
 from datetime import datetime
+from mongodb_connector import MongoDBConnector
+import warnings
+warnings.filterwarnings('ignore', message='DataFrame is highly fragmented')
 
 
 # ─────────────────────────────────────────────
@@ -128,6 +131,14 @@ class DSSVacunacionApp:
         self.archivos_no_estructurados = []
         self.resumen_homogeneizacion = {}
         self.contenido_archivos_externos = {}
+
+        # MongoDB connection
+        try:
+            self.mongo = MongoDBConnector()
+            print("✓ MongoDB conectado exitosamente")
+        except Exception as e:
+            print(f"⚠ Error al conectar a MongoDB: {e}")
+            self.mongo = None
 
         self._construir_ui()
 
@@ -763,6 +774,9 @@ class DSSVacunacionApp:
                 if df is None:
                     raise Exception("No se pudo detectar el encoding del CSV.")
 
+                self.root.after(0, lambda: self._set_status("Optimizando datos..."))
+                time.sleep(0.3)
+                df = pd.DataFrame(df)
                 df["_hoja"] = "CSV"
                 self.df = df
 
@@ -777,10 +791,12 @@ class DSSVacunacionApp:
 
                 frames = []
                 for nombre_hoja, df_hoja in todas_hojas.items():
+                    df_hoja = df_hoja.copy()
                     df_hoja["_hoja"] = nombre_hoja
                     frames.append(df_hoja)
 
-                self.df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+                df_temp = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+                self.df = df_temp.copy() if not df_temp.empty else df_temp
 
             self.root.after(0, self._extraccion_completada)
 
@@ -814,6 +830,36 @@ class DSSVacunacionApp:
         self.lbl_resumen_extraccion.config(text=resumen, fg=VERDE_SALUD)
         self._set_status(f"Extraccion completada -- {total:,} registros, {cols} columnas")
 
+        self._defragmentar_dataframe()
+
+        if self.mongo:
+            try:
+                archivo_nombre = os.path.basename(self.archivo_cargado)
+                resultado = self.mongo.guardar_datos_vacunas(self.df, archivo_nombre)
+
+                if resultado['exito']:
+                    msg_mongo = f"✓ {resultado['registros_insertados']} registros guardados en MongoDB"
+                    self._set_status(msg_mongo)
+                    print(f"✓ MongoDB: {msg_mongo}")
+
+                    self.mongo.registrar_extraccion(
+                        archivo=archivo_nombre,
+                        estadisticas={
+                            'filas': len(self.df),
+                            'columnas': len(self.df.columns),
+                            'estado_resumen': self.df['estado'].value_counts().to_dict()
+                                            if 'estado' in self.df.columns else {}
+                        }
+                    )
+                else:
+                    msg_error = f"⚠ Error MongoDB: {resultado['error']}"
+                    self._set_status(msg_error)
+                    print(f"✗ {msg_error}")
+
+            except Exception as e:
+                print(f"✗ Error al guardar en MongoDB: {e}")
+                self._set_status(f"⚠ Error MongoDB: {str(e)}")
+
         # Navegar automáticamente a pantalla de transformación
         self.root.after(800, self._iniciar_transformacion)
 
@@ -845,28 +891,36 @@ class DSSVacunacionApp:
                 estructuradas.append(col)
         return estructuradas, no_estructuradas
 
+    def _defragmentar_dataframe(self):
+        """Defragmenta el DataFrame completamente para archivos grandes."""
+        if self.df is None or self.df.empty:
+            return
+        self.df = pd.DataFrame(self.df)
+
     def _homogeneizar_datos(self):
         """Normaliza abreviaturas de estados mexicanos y limpia texto."""
         resumen = {}
         if self.df is None:
             return resumen
 
-        for col in self.df.columns:
+        df = self.df.copy()
+
+        for col in df.columns:
             if col == "_hoja":
                 continue
-            if self.df[col].dtype != "object":
+            if df[col].dtype != "object":
                 continue
 
             # Limpieza básica: strip y colapsar espacios múltiples
-            antes = self.df[col].copy()
-            self.df[col] = self.df[col].astype(str).str.strip()
-            self.df[col] = self.df[col].str.replace(r'\s+', ' ', regex=True)
-            self.df[col] = self.df[col].replace("nan", pd.NA)
+            antes = df[col].copy()
+            df[col] = df[col].astype(str).str.strip()
+            df[col] = df[col].str.replace(r'\s+', ' ', regex=True)
+            df[col] = df[col].replace("nan", pd.NA)
 
-            espacios_limpiados = (antes.astype(str) != self.df[col].astype(str)).sum()
+            espacios_limpiados = (antes.astype(str) != df[col].astype(str)).sum()
 
             # Detectar si es columna de estados: >30% de valores únicos coinciden
-            valores_unicos = self.df[col].dropna().str.lower().str.strip().unique()
+            valores_unicos = df[col].dropna().str.lower().str.strip().unique()
             if len(valores_unicos) == 0:
                 continue
 
@@ -882,9 +936,9 @@ class DSSVacunacionApp:
                     key = str(val).lower().strip()
                     return ESTADOS_MEXICO.get(key, val)
 
-                antes_norm = self.df[col].copy()
-                self.df[col] = self.df[col].apply(normalizar_estado)
-                estados_normalizados = (antes_norm != self.df[col]).sum()
+                antes_norm = df[col].copy()
+                df[col] = df[col].apply(normalizar_estado)
+                estados_normalizados = (antes_norm != df[col]).sum()
 
             if espacios_limpiados > 0 or estados_normalizados > 0:
                 resumen[col] = {
@@ -892,6 +946,7 @@ class DSSVacunacionApp:
                     "estados_normalizados": int(estados_normalizados)
                 }
 
+        self.df = df
         self.resumen_homogeneizacion = resumen
         return resumen
 
@@ -1253,6 +1308,15 @@ class DSSVacunacionApp:
         widget.bind("<Enter>", lambda e: widget.config(bg=color_hover))
         widget.bind("<Leave>", lambda e: widget.config(bg=color_normal))
 
+    def desconectar_mongodb(self):
+        """Cierra la conexión a MongoDB al salir de la aplicación"""
+        if hasattr(self, 'mongo') and self.mongo:
+            try:
+                self.mongo.desconectar()
+                print("✓ Conexión a MongoDB cerrada correctamente")
+            except Exception as e:
+                print(f"✗ Error al cerrar conexión a MongoDB: {e}")
+
 
 # ══════════════════════════════════════════════
 #  PUNTO DE ENTRADA
@@ -1260,4 +1324,11 @@ class DSSVacunacionApp:
 if __name__ == "__main__":
     root = ttk_boot.Window(themename="flatly")
     app = DSSVacunacionApp(root)
+
+    def on_closing():
+        if messagebox.askokcancel("Salir", "¿Deseas cerrar la aplicación?"):
+            app.desconectar_mongodb()
+            root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
