@@ -1,6 +1,7 @@
 """
 Módulo de conexión e integración con MongoDB
 Para guardar datos extraídos de Excel en MongoDB
+Colecciones: datos_internos, datos_externos, datos_no_estructurados
 """
 
 from pymongo.mongo_client import MongoClient
@@ -8,13 +9,16 @@ from pymongo.server_api import ServerApi
 from datetime import datetime
 import pandas as pd
 import logging
+import certifi
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 MONGODB_URI = "mongodb+srv://cristian0402218_db_user:Hz3AdKNoX9Bc3hs2@cluster0.ukqqx1n.mongodb.net/?appName=Cluster0"
 DB_NAME = "vacunacion_db"
-COLLECTION_VACUNAS = "vacunas"
+COLLECTION_INTERNOS = "datos_internos"
+COLLECTION_EXTERNOS = "datos_externos"
+COLLECTION_NO_ESTRUCTURADOS = "datos_no_estructurados"
 COLLECTION_REGISTROS = "registros_extraccion"
 
 
@@ -30,7 +34,7 @@ class MongoDBConnector:
     def conectar(self):
         """Establece conexión con MongoDB"""
         try:
-            self.client = MongoClient(MONGODB_URI, server_api=ServerApi('1'))
+            self.client = MongoClient(MONGODB_URI, server_api=ServerApi('1'), tls=True, tlsAllowInvalidCertificates=True)
             self.client.admin.command('ping')
             self.db = self.client[DB_NAME]
             logger.info("✓ Conexión exitosa a MongoDB")
@@ -45,77 +49,127 @@ class MongoDBConnector:
             self.client.close()
             logger.info("Desconectado de MongoDB")
 
-    def guardar_datos_vacunas(self, df: pd.DataFrame, fuente: str = "Excel", tamanyo_chunk: int = 10000) -> dict:
+    def guardar_datos_internos(self, df: pd.DataFrame, columnas: list, fuente: str = "Excel", tamanyo_chunk: int = 10000) -> dict:
         """
-        Guarda datos de vacunación en MongoDB (optimizado para archivos grandes)
+        Guarda datos internos (estructurados) en MongoDB
 
         Args:
-            df (pd.DataFrame): DataFrame con los datos a guardar
-            fuente (str): Origen de los datos
-            tamanyo_chunk (int): Tamaño de chunks para inserción
-
-        Returns:
-            dict: Resultado de la operación con estadísticas
+            df: DataFrame con todos los datos
+            columnas: lista de columnas estructuradas a guardar
+            fuente: origen de los datos
+            tamanyo_chunk: tamaño de chunks para inserción
         """
         try:
-            collection = self.db[COLLECTION_VACUNAS]
-            total_registros = len(df)
+            collection = self.db[COLLECTION_INTERNOS]
+
+            cols_guardar = [c for c in columnas if c in df.columns]
+            if "_hoja" in df.columns:
+                cols_guardar.append("_hoja")
+            df_internos = df[cols_guardar]
+
+            total_registros = len(df_internos)
             total_insertados = 0
-            todas_ids = []
 
             for inicio in range(0, total_registros, tamanyo_chunk):
                 fin = min(inicio + tamanyo_chunk, total_registros)
-                chunk = df.iloc[inicio:fin]
+                chunk = df_internos.iloc[inicio:fin]
 
                 datos = chunk.to_dict('records')
-
                 for registro in datos:
                     registro['fecha_insercion'] = datetime.now()
                     registro['fuente'] = fuente
-                    registro['procesado'] = False
+                    registro['tipo'] = 'interno'
 
                 resultado = collection.insert_many(datos)
                 total_insertados += len(resultado.inserted_ids)
-                todas_ids.extend(resultado.inserted_ids)
 
                 if total_registros > 50000:
                     porcentaje = (fin / total_registros) * 100
-                    logger.info(f"  Progreso: {porcentaje:.1f}% ({fin}/{total_registros})")
+                    logger.info(f"  Internos progreso: {porcentaje:.1f}% ({fin}/{total_registros})")
 
-            stats = {
-                'exito': True,
-                'registros_insertados': total_insertados,
-                'ids_insertados': todas_ids,
-                'fecha': datetime.now(),
-                'tamanyo_original': total_registros,
-                'procesado_en_chunks': total_registros > 50000
-            }
-
-            logger.info(f"✓ {stats['registros_insertados']} registros guardados en MongoDB")
-            return stats
+            logger.info(f"✓ {total_insertados} registros internos guardados en MongoDB")
+            return {'exito': True, 'registros_insertados': total_insertados, 'fecha': datetime.now()}
 
         except Exception as e:
-            logger.error(f"✗ Error al guardar datos: {e}")
-            return {
-                'exito': False,
-                'error': str(e),
-                'fecha': datetime.now()
-            }
+            logger.error(f"✗ Error al guardar datos internos: {e}")
+            return {'exito': False, 'error': str(e), 'fecha': datetime.now()}
 
-    def obtener_datos_vacunas(self, filtro: dict = None) -> list:
-        """Obtiene datos de vacunación de MongoDB"""
+    def guardar_datos_no_estructurados(self, df: pd.DataFrame, columnas: list, fuente: str = "Excel") -> dict:
+        """
+        Guarda datos no estructurados (texto libre/comentarios del Excel) en MongoDB
+
+        Args:
+            df: DataFrame con todos los datos
+            columnas: lista de columnas no estructuradas (texto largo)
+            fuente: origen de los datos
+        """
         try:
-            collection = self.db[COLLECTION_VACUNAS]
-            if filtro is None:
-                filtro = {}
+            collection = self.db[COLLECTION_NO_ESTRUCTURADOS]
+            registros = []
 
-            datos = list(collection.find(filtro))
-            logger.info(f"✓ {len(datos)} registros recuperados de MongoDB")
-            return datos
+            for _, fila in df.iterrows():
+                for col in columnas:
+                    valor = fila[col]
+                    if pd.notna(valor) and str(valor).strip():
+                        registros.append({
+                            'columna': col,
+                            'contenido': str(valor),
+                            'hoja': fila.get('_hoja', 'N/A'),
+                            'fecha_insercion': datetime.now(),
+                            'fuente': fuente,
+                            'tipo': 'no_estructurado'
+                        })
+
+            total_insertados = 0
+            if registros:
+                # Insertar en chunks de 5000
+                for inicio in range(0, len(registros), 5000):
+                    fin = min(inicio + 5000, len(registros))
+                    resultado = collection.insert_many(registros[inicio:fin])
+                    total_insertados += len(resultado.inserted_ids)
+
+            logger.info(f"✓ {total_insertados} registros no estructurados guardados en MongoDB")
+            return {'exito': True, 'registros_insertados': total_insertados, 'fecha': datetime.now()}
 
         except Exception as e:
-            logger.error(f"✗ Error al obtener datos: {e}")
-            return []
+            logger.error(f"✗ Error al guardar datos no estructurados: {e}")
+            return {'exito': False, 'error': str(e), 'fecha': datetime.now()}
+
+    def guardar_datos_externos(self, archivos: dict, fuente: str = "archivo_externo") -> dict:
+        """
+        Guarda datos externos (archivos TXT/JSON/PDF) en MongoDB
+
+        Args:
+            archivos: dict {nombre_archivo: contenido}
+            fuente: origen de los datos
+        """
+        try:
+            collection = self.db[COLLECTION_EXTERNOS]
+            registros = []
+
+            for nombre, contenido in archivos.items():
+                ext = nombre.rsplit('.', 1)[-1].lower() if '.' in nombre else 'desconocido'
+                registros.append({
+                    'nombre_archivo': nombre,
+                    'contenido': contenido,
+                    'formato': ext,
+                    'tamanyo_chars': len(contenido),
+                    'fecha_insercion': datetime.now(),
+                    'fuente': fuente,
+                    'tipo': 'externo'
+                })
+
+            total_insertados = 0
+            if registros:
+                resultado = collection.insert_many(registros)
+                total_insertados = len(resultado.inserted_ids)
+
+            logger.info(f"✓ {total_insertados} archivos externos guardados en MongoDB")
+            return {'exito': True, 'registros_insertados': total_insertados, 'fecha': datetime.now()}
+
+        except Exception as e:
+            logger.error(f"✗ Error al guardar datos externos: {e}")
+            return {'exito': False, 'error': str(e), 'fecha': datetime.now()}
 
     def registrar_extraccion(self, archivo: str, estadisticas: dict) -> dict:
         """Registra cada extracción de datos realizada"""
@@ -147,18 +201,16 @@ class MongoDBConnector:
     def obtener_estadisticas(self) -> dict:
         """Obtiene estadísticas generales de la base de datos"""
         try:
-            collection_vacunas = self.db[COLLECTION_VACUNAS]
-            collection_registros = self.db[COLLECTION_REGISTROS]
-
-            total_vacunas = collection_vacunas.count_documents({})
-            vacunas_procesadas = collection_vacunas.count_documents({'procesado': True})
-            total_extracciones = collection_registros.count_documents({})
+            col_internos = self.db[COLLECTION_INTERNOS]
+            col_externos = self.db[COLLECTION_EXTERNOS]
+            col_no_estruct = self.db[COLLECTION_NO_ESTRUCTURADOS]
+            col_registros = self.db[COLLECTION_REGISTROS]
 
             return {
-                'total_registros_vacunas': total_vacunas,
-                'registros_procesados': vacunas_procesadas,
-                'registros_pendientes': total_vacunas - vacunas_procesadas,
-                'total_extracciones': total_extracciones,
+                'datos_internos': col_internos.count_documents({}),
+                'datos_externos': col_externos.count_documents({}),
+                'datos_no_estructurados': col_no_estruct.count_documents({}),
+                'total_extracciones': col_registros.count_documents({}),
                 'fecha_consulta': datetime.now()
             }
 

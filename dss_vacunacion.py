@@ -835,29 +835,20 @@ class DSSVacunacionApp:
         if self.mongo:
             try:
                 archivo_nombre = os.path.basename(self.archivo_cargado)
-                resultado = self.mongo.guardar_datos_vacunas(self.df, archivo_nombre)
-
-                if resultado['exito']:
-                    msg_mongo = f"✓ {resultado['registros_insertados']} registros guardados en MongoDB"
-                    self._set_status(msg_mongo)
-                    print(f"✓ MongoDB: {msg_mongo}")
-
-                    self.mongo.registrar_extraccion(
-                        archivo=archivo_nombre,
-                        estadisticas={
-                            'filas': len(self.df),
-                            'columnas': len(self.df.columns),
-                            'estado_resumen': self.df['estado'].value_counts().to_dict()
-                                            if 'estado' in self.df.columns else {}
-                        }
-                    )
-                else:
-                    msg_error = f"⚠ Error MongoDB: {resultado['error']}"
-                    self._set_status(msg_error)
-                    print(f"✗ {msg_error}")
+                self.mongo.registrar_extraccion(
+                    archivo=archivo_nombre,
+                    estadisticas={
+                        'filas': len(self.df),
+                        'columnas': len(self.df.columns),
+                        'estado_resumen': self.df['estado'].value_counts().to_dict()
+                                        if 'estado' in self.df.columns else {}
+                    }
+                )
+                print(f"✓ MongoDB: Extraccion registrada")
+                self._set_status(f"Extraccion registrada en MongoDB")
 
             except Exception as e:
-                print(f"✗ Error al guardar en MongoDB: {e}")
+                print(f"✗ Error al registrar en MongoDB: {e}")
                 self._set_status(f"⚠ Error MongoDB: {str(e)}")
 
         # Navegar automáticamente a pantalla de transformación
@@ -1011,28 +1002,31 @@ class DSSVacunacionApp:
     def _proceso_transformacion(self):
         pasos = [
             (10, "Clasificando columnas por tipo de dato..."),
-            (25, "Detectando texto libre y comentarios..."),
-            (40, "Separando datos estructurados de no estructurados..."),
-            (55, "Homogeneizando datos (estados, espacios)..."),
-            (70, "Cargando archivos no estructurados..."),
-            (85, "Limpiando valores nulos..."),
-            (95, "Generando resumen de transformacion..."),
+            (20, "Detectando texto libre y comentarios..."),
+            (35, "Homogeneizando datos (estados, espacios)..."),
+            (50, "Cargando archivos no estructurados..."),
+            (60, "Limpiando valores nulos..."),
+            (75, "Guardando datos internos en MongoDB..."),
+            (85, "Guardando datos no estructurados en MongoDB..."),
+            (92, "Guardando datos externos en MongoDB..."),
+            (98, "Generando resumen de transformacion..."),
             (100, "Transformacion completada"),
         ]
 
         for idx, (valor, texto) in enumerate(pasos):
             self.root.after(0, lambda v=valor, t=texto: self._actualizar_progreso_transformar(v, t))
-            time.sleep(0.5)
+            time.sleep(0.4)
 
-            # Ejecutar homogeneización en su paso
-            if idx == 3:
+            if idx == 2:
                 self._homogeneizar_datos()
-            # Cargar archivos no estructurados en su paso
-            elif idx == 4:
+            elif idx == 3:
                 self._cargar_archivos_no_estructurados()
 
         # Clasificar columnas
         self.cols_estructuradas, self.cols_no_estructuradas = self._clasificar_columnas(self.df)
+
+        # Guardar en las 3 colecciones de MongoDB
+        res_mongo = self._guardar_en_mongodb()
 
         # Contar nulos limpiados
         nulos_total = self.df.isnull().sum().sum()
@@ -1065,7 +1059,59 @@ class DSSVacunacionApp:
             for nombre in self.contenido_archivos_externos:
                 resultado += f"   - {nombre}\n"
 
+        # Resumen de MongoDB
+        if res_mongo:
+            resultado += f"\nMONGODB (3 colecciones):\n"
+            for col_nombre, info in res_mongo.items():
+                if info.get('exito'):
+                    resultado += f"   - {col_nombre}: {info['registros_insertados']} registros\n"
+                else:
+                    resultado += f"   - {col_nombre}: Error - {info.get('error', 'desconocido')}\n"
+
         self.root.after(0, lambda: self._transformacion_completada(resultado))
+
+    def _guardar_en_mongodb(self):
+        """Guarda datos en las 3 colecciones de MongoDB"""
+        if not self.mongo:
+            return None
+
+        resultados = {}
+        archivo_nombre = os.path.basename(self.archivo_cargado) if self.archivo_cargado else "desconocido"
+
+        try:
+            # 1. Datos internos (estructurados)
+            res = self.mongo.guardar_datos_internos(self.df, self.cols_estructuradas, archivo_nombre)
+            resultados['datos_internos'] = res
+            print(f"  MongoDB datos_internos: {res.get('registros_insertados', 0)} registros")
+        except Exception as e:
+            resultados['datos_internos'] = {'exito': False, 'error': str(e)}
+            print(f"  MongoDB datos_internos error: {e}")
+
+        try:
+            # 2. Datos no estructurados (texto libre del Excel)
+            if self.cols_no_estructuradas:
+                res = self.mongo.guardar_datos_no_estructurados(self.df, self.cols_no_estructuradas, archivo_nombre)
+            else:
+                res = {'exito': True, 'registros_insertados': 0}
+            resultados['datos_no_estructurados'] = res
+            print(f"  MongoDB datos_no_estructurados: {res.get('registros_insertados', 0)} registros")
+        except Exception as e:
+            resultados['datos_no_estructurados'] = {'exito': False, 'error': str(e)}
+            print(f"  MongoDB datos_no_estructurados error: {e}")
+
+        try:
+            # 3. Datos externos (archivos TXT/JSON/PDF)
+            if self.contenido_archivos_externos:
+                res = self.mongo.guardar_datos_externos(self.contenido_archivos_externos, archivo_nombre)
+            else:
+                res = {'exito': True, 'registros_insertados': 0}
+            resultados['datos_externos'] = res
+            print(f"  MongoDB datos_externos: {res.get('registros_insertados', 0)} registros")
+        except Exception as e:
+            resultados['datos_externos'] = {'exito': False, 'error': str(e)}
+            print(f"  MongoDB datos_externos error: {e}")
+
+        return resultados
 
     def _actualizar_progreso_transformar(self, valor, texto):
         self.progreso_transformar["value"] = valor
