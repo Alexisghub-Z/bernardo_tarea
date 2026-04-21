@@ -17,6 +17,19 @@ from mongodb_connector import MongoDBConnector
 import warnings
 warnings.filterwarnings('ignore', message='DataFrame is highly fragmented')
 
+try:
+    from matplotlib.figure import Figure
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    import matplotlib
+    matplotlib.rcParams.update({
+        'font.family': 'Segoe UI',
+        'axes.spines.top': False,
+        'axes.spines.right': False,
+    })
+    MATPLOTLIB_OK = True
+except ImportError:
+    MATPLOTLIB_OK = False
+
 
 # ─────────────────────────────────────────────
 #  Colores y estilos personalizados
@@ -204,6 +217,17 @@ class DSSVacunacionApp:
         )
         self.btn_nav_mostrar.pack(side="left", padx=8, pady=6)
 
+        self.btn_nav_dashboard = tk.Button(
+            nav_inner,
+            text="DASHBOARD",
+            font=("Segoe UI", 11, "bold"),
+            bg=AZUL_GOB, fg=BLANCO,
+            relief="flat", cursor="hand2",
+            padx=30, pady=8,
+            command=lambda: self.mostrar_pantalla("dashboard")
+        )
+        self.btn_nav_dashboard.pack(side="left", padx=8, pady=6)
+
         # ── Barra de estado ─────────────────────
         self.status_bar = tk.Frame(self.root, bg=VERDE_SALUD, height=32)
         self.status_bar.pack(fill="x")
@@ -225,6 +249,7 @@ class DSSVacunacionApp:
         self._construir_pantalla_extraer()
         self._construir_pantalla_transformar()
         self._construir_pantalla_mostrar()
+        self._construir_pantalla_dashboard()
 
         # ── Barra inferior ───────────────────────
         barra_inf = tk.Frame(self.root, bg=AZUL_GOB, height=28)
@@ -256,15 +281,13 @@ class DSSVacunacionApp:
         self.pantalla_actual = nombre
 
         # Actualizar botones de navegación
-        if nombre == "extraer":
-            self.btn_nav_extraer.config(bg=VERDE_SALUD)
-            self.btn_nav_mostrar.config(bg=AZUL_GOB)
-        elif nombre == "mostrar":
-            self.btn_nav_extraer.config(bg=AZUL_GOB)
-            self.btn_nav_mostrar.config(bg=VERDE_SALUD)
-        else:
-            self.btn_nav_extraer.config(bg=AZUL_GOB)
-            self.btn_nav_mostrar.config(bg=AZUL_GOB)
+        btns = {
+            "extraer": self.btn_nav_extraer,
+            "mostrar": self.btn_nav_mostrar,
+            "dashboard": self.btn_nav_dashboard,
+        }
+        for key, btn in btns.items():
+            btn.config(bg=VERDE_SALUD if key == nombre else AZUL_GOB)
 
     # ══════════════════════════════════════════
     #  PANTALLA 1: EXTRAER
@@ -396,88 +419,75 @@ class DSSVacunacionApp:
 
         # Barra de progreso
         self.progreso_extraer = ttk.Progressbar(center, mode="indeterminate",
-                                                length=400,
+                                                length=420,
                                                 style="success.Horizontal.TProgressbar")
-        self.progreso_extraer.pack(pady=(0, 15))
+        self.progreso_extraer.pack(pady=(0, 8))
 
-        # Resumen de extracción
         self.lbl_resumen_extraccion = tk.Label(
-            center,
-            text="",
-            font=("Segoe UI", 10),
-            bg=GRIS_FONDO, fg=TEXTO_OSCURO,
-            justify="left"
+            center, text="",
+            font=("Segoe UI", 9), bg=GRIS_FONDO, fg="#7A8499"
         )
         self.lbl_resumen_extraccion.pack()
 
     # ══════════════════════════════════════════
-    #  PANTALLA 2: TRANSFORMAR
+    #  PANTALLA 2: TRANSFORMAR (pantalla de carga)
     # ══════════════════════════════════════════
     def _construir_pantalla_transformar(self):
         frame = tk.Frame(self.contenedor, bg=GRIS_FONDO)
         self.pantallas["transformar"] = frame
 
         center = tk.Frame(frame, bg=GRIS_FONDO)
-        center.place(relx=0.5, rely=0.45, anchor="center")
+        center.place(relx=0.5, rely=0.42, anchor="center")
 
-        tk.Label(
-            center,
-            text="TRANSFORMANDO DATOS",
-            font=("Segoe UI", 22, "bold"),
-            bg=GRIS_FONDO, fg=AZUL_GOB
-        ).pack(pady=(0, 5))
+        # Ícono / indicador visual
+        tk.Label(center, text="⚙", font=("Segoe UI", 40),
+                 bg=GRIS_FONDO, fg=AZUL_GOB).pack(pady=(0, 12))
 
-        tk.Label(
-            center,
-            text="Clasificando y procesando la informacion extraida...",
-            font=("Segoe UI", 11),
-            bg=GRIS_FONDO, fg="#7A8499"
-        ).pack(pady=(0, 30))
+        tk.Label(center, text="Procesando datos",
+                 font=("Segoe UI", 20, "bold"),
+                 bg=GRIS_FONDO, fg=AZUL_GOB).pack()
 
-        # Barra de progreso de transformación
-        self.progreso_transformar = ttk.Progressbar(center, mode="determinate",
-                                                     length=500,
-                                                     style="success.Horizontal.TProgressbar")
-        self.progreso_transformar.pack(pady=(0, 20))
+        tk.Label(center, text="Esto tomará solo unos segundos...",
+                 font=("Segoe UI", 10),
+                 bg=GRIS_FONDO, fg="#B0B8C9").pack(pady=(4, 28))
 
-        # Etiqueta de paso actual
+        # Barra de progreso
+        self.progreso_transformar = ttk.Progressbar(
+            center, mode="determinate", length=460,
+            style="success.Horizontal.TProgressbar"
+        )
+        self.progreso_transformar.pack(pady=(0, 14))
+
+        # Paso actual — una sola línea, limpia
         self.lbl_paso_transformar = tk.Label(
-            center,
-            text="",
-            font=("Segoe UI", 11),
-            bg=GRIS_FONDO, fg=VERDE_SALUD
+            center, text="",
+            font=("Segoe UI", 10), bg=GRIS_FONDO, fg=VERDE_SALUD
         )
-        self.lbl_paso_transformar.pack(pady=(0, 25))
+        self.lbl_paso_transformar.pack()
 
-        # Card de resultados de transformación
-        self.card_resultado_transform = tk.Frame(center, bg=BLANCO, relief="flat",
-                                                  highlightbackground=GRIS_BORDE,
-                                                  highlightthickness=1)
-        self.card_resultado_transform.pack(fill="x", padx=20, pady=(0, 20))
+        # Pasos como chips visuales (se pintan dinámicamente)
+        self._chips_frame = tk.Frame(center, bg=GRIS_FONDO)
+        self._chips_frame.pack(pady=(20, 0))
+        self._chips = []
+        pasos_labels = ["Extraer", "Clasificar", "Homogeneizar",
+                        "Cargar ext.", "Limpiar", "Listo"]
+        for i, p in enumerate(pasos_labels):
+            chip = tk.Label(self._chips_frame, text=p,
+                            font=("Segoe UI", 8), bg="#E8ECF3",
+                            fg="#B0B8C9", padx=10, pady=4,
+                            relief="flat")
+            chip.grid(row=0, column=i, padx=3)
+            self._chips.append(chip)
 
-        self.lbl_resultado_transform = tk.Label(
-            self.card_resultado_transform,
-            text="",
-            font=("Segoe UI", 10),
-            bg=BLANCO, fg=TEXTO_OSCURO,
-            justify="left", anchor="w",
-            wraplength=500
-        )
-        self.lbl_resultado_transform.pack(padx=25, pady=20)
-
-        # Botón Ver Datos
-        self.btn_ver_datos = tk.Button(
-            center,
-            text="VER DATOS",
-            font=("Segoe UI", 13, "bold"),
-            bg=VERDE_SALUD, fg=BLANCO,
-            relief="flat", cursor="hand2",
-            padx=35, pady=14,
-            command=lambda: self.mostrar_pantalla("mostrar"),
-            state="disabled"
-        )
-        self.btn_ver_datos.pack(pady=(5, 0))
-        self._hover(self.btn_ver_datos, VERDE_SALUD, "#005C3D")
+    def _activar_chip(self, idx):
+        """Colorea el chip del paso idx como activo."""
+        for i, chip in enumerate(self._chips):
+            if i < idx:
+                chip.config(bg=VERDE_SALUD, fg=BLANCO)
+            elif i == idx:
+                chip.config(bg=AZUL_GOB, fg=BLANCO)
+            else:
+                chip.config(bg="#E8ECF3", fg="#B0B8C9")
 
     # ══════════════════════════════════════════
     #  PANTALLA 3: MOSTRAR
@@ -486,74 +496,84 @@ class DSSVacunacionApp:
         frame = tk.Frame(self.contenedor, bg=GRIS_FONDO)
         self.pantallas["mostrar"] = frame
 
-        # ── Sección superior: tabla de datos estructurados ──
-        top_section = tk.Frame(frame, bg=BLANCO, relief="flat",
-                               highlightbackground=GRIS_BORDE, highlightthickness=1)
-        top_section.pack(fill="both", expand=True, padx=15, pady=(10, 5))
+        # ── Tabla principal (80% del espacio) ──
+        card_tabla = tk.Frame(frame, bg=BLANCO, relief="flat",
+                              highlightbackground=GRIS_BORDE, highlightthickness=1)
+        card_tabla.pack(fill="both", expand=True, padx=15, pady=(10, 4))
 
-        # Cabecera de tabla
-        cab = tk.Frame(top_section, bg=BLANCO)
-        cab.pack(fill="x", padx=15, pady=(10, 5))
+        # Cabecera de la tabla
+        cab = tk.Frame(card_tabla, bg=BLANCO)
+        cab.pack(fill="x", padx=16, pady=(12, 0))
 
         self.lbl_titulo_tabla = tk.Label(
-            cab,
-            text="Datos Estructurados",
-            font=("Segoe UI", 13, "bold"),
-            bg=BLANCO, fg=TEXTO_OSCURO
+            cab, text="Datos",
+            font=("Segoe UI", 13, "bold"), bg=BLANCO, fg=TEXTO_OSCURO
         )
         self.lbl_titulo_tabla.pack(side="left")
 
         self.lbl_conteo = tk.Label(
-            cab,
-            text="",
-            font=("Segoe UI", 9),
-            bg=BLANCO, fg="#7A8499"
+            cab, text="",
+            font=("Segoe UI", 9), bg=BLANCO, fg="#7A8499"
         )
-        self.lbl_conteo.pack(side="right")
+        self.lbl_conteo.pack(side="right", pady=2)
 
-        # Barra de herramientas
-        toolbar = tk.Frame(top_section, bg=BLANCO)
-        toolbar.pack(fill="x", padx=15, pady=(0, 5))
+        # Stats inline debajo del título
+        self.lbl_stats = tk.Label(
+            card_tabla, text="",
+            font=("Segoe UI", 8), bg=BLANCO, fg="#B0B8C9", anchor="w"
+        )
+        self.lbl_stats.pack(fill="x", padx=16, pady=(0, 6))
 
-        tk.Label(toolbar, text="Buscar:", font=("Segoe UI", 9, "bold"),
-                 bg=BLANCO, fg=TEXTO_OSCURO).pack(side="left")
-        self.entry_buscar = tk.Entry(toolbar, font=("Segoe UI", 9),
-                                     relief="solid", bd=1, width=30)
-        self.entry_buscar.pack(side="left", padx=(5, 10))
+        # Toolbar: buscar + botones
+        toolbar = tk.Frame(card_tabla, bg="#F8FAFC")
+        toolbar.pack(fill="x")
+
+        tk.Frame(card_tabla, bg=GRIS_BORDE, height=1).pack(fill="x")
+
+        inner_tb = tk.Frame(toolbar, bg="#F8FAFC")
+        inner_tb.pack(fill="x", padx=12, pady=6)
+
+        # Búsqueda
+        buscar_wrap = tk.Frame(inner_tb, bg="#F8FAFC",
+                               highlightbackground=GRIS_BORDE, highlightthickness=1)
+        buscar_wrap.pack(side="left")
+        tk.Label(buscar_wrap, text=" 🔍 ", font=("Segoe UI", 9),
+                 bg="#F8FAFC", fg="#7A8499").pack(side="left")
+        self.entry_buscar = tk.Entry(buscar_wrap, font=("Segoe UI", 9),
+                                     relief="flat", bd=0, width=28,
+                                     bg="#F8FAFC", fg=TEXTO_OSCURO)
+        self.entry_buscar.pack(side="left", pady=5, padx=(0, 6))
         self.entry_buscar.bind("<KeyRelease>", self.filtrar_datos)
 
         btn_limpiar = tk.Button(
-            toolbar, text="Limpiar",
-            font=("Segoe UI", 8), bg="#E8ECF3", fg=TEXTO_OSCURO,
-            relief="flat", cursor="hand2", padx=8, pady=4,
+            inner_tb, text="✕",
+            font=("Segoe UI", 9), bg="#F8FAFC", fg="#7A8499",
+            relief="flat", cursor="hand2", padx=6, pady=4,
             command=self.limpiar_filtros
         )
-        btn_limpiar.pack(side="left", padx=(0, 15))
+        btn_limpiar.pack(side="left", padx=(6, 0))
 
         btn_csv = tk.Button(
-            toolbar, text="Exportar CSV",
-            font=("Segoe UI", 9, "bold"), bg="#1A6B4A", fg=BLANCO,
-            relief="flat", cursor="hand2", padx=10, pady=4,
+            inner_tb, text="↓  CSV",
+            font=("Segoe UI", 9, "bold"), bg=VERDE_SALUD, fg=BLANCO,
+            relief="flat", cursor="hand2", padx=12, pady=4,
             command=self.exportar_csv
         )
         btn_csv.pack(side="right", padx=(5, 0))
-        self._hover(btn_csv, "#1A6B4A", "#124D35")
+        self._hover(btn_csv, VERDE_SALUD, "#005C3D")
 
         btn_reporte = tk.Button(
-            toolbar, text="Reporte TXT",
-            font=("Segoe UI", 9, "bold"), bg=NARANJA_ALERTA, fg=BLANCO,
-            relief="flat", cursor="hand2", padx=10, pady=4,
+            inner_tb, text="↓  TXT",
+            font=("Segoe UI", 9, "bold"), bg=AZUL_GOB, fg=BLANCO,
+            relief="flat", cursor="hand2", padx=12, pady=4,
             command=self.generar_reporte
         )
         btn_reporte.pack(side="right", padx=(5, 0))
-        self._hover(btn_reporte, NARANJA_ALERTA, "#C44A00")
-
-        separador = tk.Frame(top_section, bg=GRIS_BORDE, height=1)
-        separador.pack(fill="x", padx=15)
+        self._hover(btn_reporte, AZUL_GOB, "#00529B")
 
         # Tabla
-        tabla_frame = tk.Frame(top_section, bg=BLANCO)
-        tabla_frame.pack(fill="both", expand=True, padx=15, pady=(5, 10))
+        tabla_frame = tk.Frame(card_tabla, bg=BLANCO)
+        tabla_frame.pack(fill="both", expand=True, padx=0, pady=0)
 
         scroll_y = ttk.Scrollbar(tabla_frame, orient="vertical")
         scroll_y.pack(side="right", fill="y")
@@ -571,105 +591,656 @@ class DSSVacunacionApp:
         scroll_y.config(command=self.tabla.yview)
         scroll_x.config(command=self.tabla.xview)
 
-        # Estilo tabla
         estilo = ttk.Style()
         estilo.configure("Custom.Treeview",
-                          background=BLANCO,
-                          foreground=TEXTO_OSCURO,
-                          rowheight=26,
-                          fieldbackground=BLANCO,
-                          font=("Segoe UI", 9))
+                         background=BLANCO, foreground=TEXTO_OSCURO,
+                         rowheight=26, fieldbackground=BLANCO,
+                         font=("Segoe UI", 9))
         estilo.configure("Custom.Treeview.Heading",
-                          background=AZUL_GOB,
-                          foreground=BLANCO,
-                          font=("Segoe UI", 9, "bold"),
-                          relief="flat")
+                         background=AZUL_GOB, foreground=BLANCO,
+                         font=("Segoe UI", 9, "bold"), relief="flat")
         estilo.map("Custom.Treeview",
                    background=[("selected", VERDE_CLARO)],
                    foreground=[("selected", BLANCO)])
 
         self._mostrar_placeholder()
 
-        # ── Sección inferior: datos no estructurados ──
-        bottom_section = tk.Frame(frame, bg=BLANCO, relief="flat",
-                                   highlightbackground=GRIS_BORDE, highlightthickness=1)
-        bottom_section.pack(fill="both", expand=True, padx=15, pady=(5, 10))
+        # ── Sección colapsable: texto no estructurado ──
+        self._ne_visible = False
+        ne_toggle_bar = tk.Frame(frame, bg=GRIS_FONDO)
+        ne_toggle_bar.pack(fill="x", padx=15, pady=(0, 2))
 
-        cab2 = tk.Frame(bottom_section, bg=BLANCO)
-        cab2.pack(fill="x", padx=15, pady=(10, 5))
-
-        self.lbl_titulo_no_estruct = tk.Label(
-            cab2,
-            text="Datos No Estructurados (Texto Libre / Comentarios)",
-            font=("Segoe UI", 12, "bold"),
-            bg=BLANCO, fg=TEXTO_OSCURO
+        self._btn_toggle_ne = tk.Button(
+            ne_toggle_bar,
+            text="▶  Datos no estructurados",
+            font=("Segoe UI", 8, "bold"), bg=GRIS_FONDO, fg="#7A8499",
+            relief="flat", cursor="hand2", anchor="w",
+            command=self._toggle_no_estructurado
         )
-        self.lbl_titulo_no_estruct.pack(side="left")
+        self._btn_toggle_ne.pack(side="left")
 
         self.lbl_conteo_no_estruct = tk.Label(
-            cab2,
-            text="",
-            font=("Segoe UI", 9),
-            bg=BLANCO, fg="#7A8499"
+            ne_toggle_bar, text="",
+            font=("Segoe UI", 8), bg=GRIS_FONDO, fg="#B0B8C9"
         )
-        self.lbl_conteo_no_estruct.pack(side="right")
+        self.lbl_conteo_no_estruct.pack(side="left", padx=(6, 0))
 
-        sep2 = tk.Frame(bottom_section, bg=GRIS_BORDE, height=1)
-        sep2.pack(fill="x", padx=15)
+        self._ne_frame = tk.Frame(frame, bg=BLANCO, relief="flat",
+                                  highlightbackground=GRIS_BORDE, highlightthickness=1)
+
+        self.lbl_titulo_no_estruct = tk.Label(
+            self._ne_frame, text="",
+            font=("Segoe UI", 10, "bold"), bg=BLANCO, fg=TEXTO_OSCURO
+        )
 
         self.txt_no_estructurado = scrolledtext.ScrolledText(
-            bottom_section,
-            font=("Consolas", 9),
-            bg="#FAFBFC", fg=TEXTO_OSCURO,
-            wrap="word", relief="flat",
-            state="disabled"
+            self._ne_frame,
+            font=("Consolas", 8), bg="#FAFBFC", fg=TEXTO_OSCURO,
+            wrap="word", relief="flat", state="disabled", height=8
         )
-        self.txt_no_estructurado.pack(fill="both", expand=True, padx=15, pady=(5, 10))
+        self.txt_no_estructurado.pack(fill="both", expand=True, padx=12, pady=8)
 
-        # ── Panel de sugerencias de fuentes de datos ──
-        card_sugerencias = tk.Frame(frame, bg=AMARILLO_SUGE, relief="flat",
-                                     highlightbackground="#E6D990", highlightthickness=1)
-        card_sugerencias.pack(fill="x", padx=15, pady=(5, 5))
+    def _toggle_no_estructurado(self):
+        self._ne_visible = not self._ne_visible
+        if self._ne_visible:
+            self._ne_frame.pack(fill="both", padx=15, pady=(0, 8))
+            self._btn_toggle_ne.config(text="▼  Datos no estructurados")
+        else:
+            self._ne_frame.pack_forget()
+            self._btn_toggle_ne.config(text="▶  Datos no estructurados")
 
-        sug_inner = tk.Frame(card_sugerencias, bg=AMARILLO_SUGE)
-        sug_inner.pack(fill="x", padx=15, pady=10)
+    # ══════════════════════════════════════════
+    #  PANTALLA 4: DASHBOARD DE KPIs
+    # ══════════════════════════════════════════
+    def _construir_pantalla_dashboard(self):
+        frame = tk.Frame(self.contenedor, bg=GRIS_FONDO)
+        self.pantallas["dashboard"] = frame
+
+        # Header con título y botón actualizar
+        header = tk.Frame(frame, bg=GRIS_FONDO)
+        header.pack(fill="x", padx=15, pady=(10, 0))
 
         tk.Label(
-            sug_inner,
-            text="Sugerencias de fuentes de datos no estructurados",
-            font=("Segoe UI", 10, "bold"),
-            bg=AMARILLO_SUGE, fg="#7A6800"
-        ).pack(anchor="w")
+            header,
+            text="DASHBOARD DE KPIs",
+            font=("Segoe UI", 18, "bold"),
+            bg=GRIS_FONDO, fg=AZUL_GOB
+        ).pack(side="left")
 
-        sugerencias_texto = (
-            "  - Reportes de la OMS/WHO sobre cobertura de vacunacion\n"
-            "  - Boletines epidemiologicos del SINAVE (Sistema Nacional de Vigilancia Epidemiologica)\n"
-            "  - Noticias y comunicados sobre campanas de vacunacion en Mexico\n"
-            "  - Informes del Programa de Vacunacion Universal (PVU)\n"
-            "  - Comunicados y alertas de COFEPRIS\n"
-            "  - Reportes estatales de la Secretaria de Salud de Oaxaca"
-        )
         tk.Label(
-            sug_inner,
-            text=sugerencias_texto,
+            header,
+            text="Indicadores clave calculados a partir de los datos cargados",
             font=("Segoe UI", 9),
-            bg=AMARILLO_SUGE, fg="#5C5500",
-            justify="left", anchor="w"
-        ).pack(anchor="w", pady=(5, 0))
+            bg=GRIS_FONDO, fg="#7A8499"
+        ).pack(side="left", padx=(12, 0), pady=4)
 
-        # ── Estadísticas rápidas en la parte inferior ──
-        stats_bar = tk.Frame(frame, bg="#E8ECF3", height=30)
-        stats_bar.pack(fill="x", padx=15, pady=(0, 5))
-        stats_bar.pack_propagate(False)
-
-        self.lbl_stats = tk.Label(
-            stats_bar,
-            text="",
-            font=("Segoe UI", 8),
-            bg="#E8ECF3", fg="#7A8499",
-            anchor="w"
+        btn_act = tk.Button(
+            header,
+            text="↻  Actualizar",
+            font=("Segoe UI", 10, "bold"),
+            bg=VERDE_SALUD, fg=BLANCO,
+            relief="flat", cursor="hand2",
+            padx=15, pady=6,
+            command=self.actualizar_dashboard
         )
-        self.lbl_stats.pack(side="left", padx=10, pady=5)
+        btn_act.pack(side="right")
+        self._hover(btn_act, VERDE_SALUD, "#005C3D")
+
+        sep = tk.Frame(frame, bg=GRIS_BORDE, height=1)
+        sep.pack(fill="x", padx=15, pady=(8, 0))
+
+        # Canvas scrollable
+        canvas_frame = tk.Frame(frame, bg=GRIS_FONDO)
+        canvas_frame.pack(fill="both", expand=True, padx=15, pady=(6, 10))
+
+        self._dash_canvas = tk.Canvas(canvas_frame, bg=GRIS_FONDO, highlightthickness=0)
+        scrollbar_d = ttk.Scrollbar(canvas_frame, orient="vertical",
+                                    command=self._dash_canvas.yview)
+        self._dash_inner = tk.Frame(self._dash_canvas, bg=GRIS_FONDO)
+
+        self._dash_inner.bind(
+            "<Configure>",
+            lambda e: self._dash_canvas.configure(
+                scrollregion=self._dash_canvas.bbox("all"))
+        )
+        self._dash_win = self._dash_canvas.create_window(
+            (0, 0), window=self._dash_inner, anchor="nw"
+        )
+        self._dash_canvas.bind(
+            "<Configure>",
+            lambda e: self._dash_canvas.itemconfig(self._dash_win, width=e.width)
+        )
+        self._dash_canvas.configure(yscrollcommand=scrollbar_d.set)
+        self._dash_canvas.bind_all(
+            "<MouseWheel>",
+            lambda e: self._dash_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+        )
+
+        scrollbar_d.pack(side="right", fill="y")
+        self._dash_canvas.pack(side="left", fill="both", expand=True)
+
+        # Placeholder inicial
+        self._dash_placeholder = tk.Label(
+            self._dash_inner,
+            text="Carga y extrae un archivo para calcular los KPIs",
+            font=("Segoe UI", 13),
+            bg=GRIS_FONDO, fg="#B0B8C9"
+        )
+        self._dash_placeholder.pack(pady=100)
+
+    # ──────────────────────────────────────────
+    #  ACTUALIZAR DASHBOARD
+    # ──────────────────────────────────────────
+    def actualizar_dashboard(self):
+        if MATPLOTLIB_OK:
+            import matplotlib.pyplot as plt
+            for fig in getattr(self, '_dash_figures', []):
+                plt.close(fig)
+        self._dash_figures = []
+        for w in self._dash_inner.winfo_children():
+            w.destroy()
+
+        if self.df is None or self.df.empty:
+            tk.Label(
+                self._dash_inner,
+                text="Sin datos cargados. Extrae un archivo primero.",
+                font=("Segoe UI", 13), bg=GRIS_FONDO, fg="#B0B8C9"
+            ).pack(pady=100)
+            return
+
+        kpis = self._computar_kpis()
+
+        DEFS = [
+            {
+                "n": 1, "titulo": "Total de Dosis Aplicadas",
+                "key": "total_dosis", "unidad": "",
+                "hint": "suma de columnas VAC / BIO / BIE / V*",
+                "umbrales": [(1_000_000, None, "#00875A", "Alto volumen"),
+                             (100_000, 1_000_000, "#F59E0B", "Volumen medio"),
+                             (0, 100_000,  "#EF4444", "Bajo volumen")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 2, "titulo": "Entidades Registradas",
+                "key": "entidades", "unidad": " estados",
+                "hint": "columna ENTIDAD",
+                "umbrales": [(20, None, "#00875A", "Alta cobertura"),
+                             (10, 20,  "#F59E0B", "Cobertura media"),
+                             (0,  10,  "#EF4444", "Baja cobertura")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 3, "titulo": "Municipios Cubiertos",
+                "key": "municipios", "unidad": " municipios",
+                "hint": "columna MUNICIPIO",
+                "umbrales": [(50, None, "#00875A", "Amplia cobertura"),
+                             (20, 50,  "#F59E0B", "Cobertura parcial"),
+                             (0,  20,  "#EF4444", "Cobertura reducida")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 4, "titulo": "Establecimientos Activos",
+                "key": "clues_activos", "unidad": " establecimientos",
+                "hint": "columna CLUES (clave interna)",
+                "umbrales": [(100, None, "#00875A", "Red amplia"),
+                             (30,  100, "#F59E0B", "Red media"),
+                             (0,   30,  "#EF4444", "Red reducida")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 5, "titulo": "Dosis BCG Aplicadas",
+                "key": "dosis_bcg", "unidad": "",
+                "hint": "columnas VBC01, VBC02, VBC03",
+                "umbrales": [(50_000, None, "#00875A", "Alto volumen"),
+                             (5_000, 50_000,  "#F59E0B", "Volumen medio"),
+                             (0,     5_000,   "#EF4444", "Bajo volumen")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 6, "titulo": "Dosis Hepatitis B",
+                "key": "dosis_hepb", "unidad": "",
+                "hint": "columnas VHB01 – VHB06",
+                "umbrales": [(50_000, None, "#00875A", "Alto volumen"),
+                             (5_000, 50_000,  "#F59E0B", "Volumen medio"),
+                             (0,     5_000,   "#EF4444", "Bajo volumen")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 7, "titulo": "Dosis VPH (Papiloma)",
+                "key": "dosis_vph", "unidad": "",
+                "hint": "columnas VPH01 – VPH04",
+                "umbrales": [(10_000, None, "#00875A", "Alto volumen"),
+                             (1_000, 10_000,  "#F59E0B", "Volumen medio"),
+                             (0,     1_000,   "#EF4444", "Bajo volumen")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 8, "titulo": "Dosis Rotavirus",
+                "key": "dosis_rotavirus", "unidad": "",
+                "hint": "columnas VRV01 – VRV04",
+                "umbrales": [(50_000, None, "#00875A", "Alto volumen"),
+                             (5_000, 50_000,  "#F59E0B", "Volumen medio"),
+                             (0,     5_000,   "#EF4444", "Bajo volumen")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 9, "titulo": "Meses con Registros",
+                "key": "meses_activos", "unidad": " / 12 meses",
+                "hint": "columna MES",
+                "umbrales": [(12, None, "#00875A", "Año completo"),
+                             (6,  12,  "#F59E0B", "Año parcial"),
+                             (0,   6,  "#EF4444", "Datos incompletos")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 10, "titulo": "Promedio Dosis por Establecimiento",
+                "key": "promedio_clues", "unidad": " dosis",
+                "hint": "total_dosis / n_establecimientos",
+                "umbrales": [(500, None, "#00875A", "Alta actividad"),
+                             (100, 500,  "#F59E0B", "Actividad media"),
+                             (0,   100,  "#EF4444", "Baja actividad")],
+                "mayor_mejor": True,
+            },
+        ]
+
+        # Configurar columnas del grid
+        self._dash_inner.columnconfigure(0, weight=1, uniform="col")
+        self._dash_inner.columnconfigure(1, weight=1, uniform="col")
+
+        for idx, defn in enumerate(DEFS):
+            datos = kpis.get(defn["key"], {})
+            valor     = datos.get("valor")
+            col_usada = datos.get("cols")
+            extra     = datos.get("extra", "")
+            defn["chart_data"] = datos.get("chart")
+            fila    = idx // 2
+            columna = idx % 2
+            self._crear_card_kpi(
+                self._dash_inner, defn, valor, col_usada, extra, fila, columna
+            )
+
+    def _computar_kpis(self):
+        df = self.df
+        resultado = {}
+
+        NO_DOSIS = {
+            "CLAVE_ENTIDAD", "ENTIDAD", "CLAVE_MUNICIPIO", "MUNICIPIO",
+            "CLUES", "NOMBRE_CLUES", "MES", "ANIO", "FECHA", "_hoja"
+        }
+        cols_dosis = [
+            c for c in df.select_dtypes(include="number").columns
+            if c.upper() not in NO_DOSIS
+        ]
+
+        def col_exacta(nombre):
+            for c in df.columns:
+                if c.upper() == nombre.upper():
+                    return c
+            return None
+
+        def cols_prefijo(prefijo):
+            p = prefijo.upper()
+            return [c for c in df.columns if c.upper().startswith(p)]
+
+        def suma_cols(lista):
+            if not lista:
+                return None
+            total = df[lista].apply(pd.to_numeric, errors="coerce").sum().sum()
+            return int(total) if total == total else None
+
+        def serie_por_mes(lista_cols):
+            """Devuelve dict {mes: total} para los meses 1-12."""
+            c_mes = col_exacta("MES")
+            if not c_mes or not lista_cols:
+                return {}
+            tmp = df[[c_mes] + lista_cols].copy()
+            tmp[c_mes] = pd.to_numeric(tmp[c_mes], errors="coerce")
+            for c in lista_cols:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            tmp["_total"] = tmp[lista_cols].sum(axis=1)
+            agrup = tmp.groupby(c_mes)["_total"].sum()
+            return {int(m): int(v) for m, v in agrup.items() if 1 <= int(m) <= 12}
+
+        c_entidad = col_exacta("ENTIDAD")
+        c_mun     = col_exacta("MUNICIPIO")
+        c_clues   = col_exacta("CLUES")
+        c_mes     = col_exacta("MES")
+
+        NOMBRES_MES = ["Ene","Feb","Mar","Abr","May","Jun",
+                       "Jul","Ago","Sep","Oct","Nov","Dic"]
+
+        # ── KPI 1: Total de dosis — hbar top-5 entidades ──
+        total_dosis = suma_cols(cols_dosis)
+        chart1 = None
+        if c_entidad and cols_dosis and total_dosis:
+            tmp = df[[c_entidad] + cols_dosis].copy()
+            for c in cols_dosis:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            top = (tmp.groupby(c_entidad)[cols_dosis]
+                      .sum().sum(axis=1)
+                      .nlargest(5).sort_values())
+            chart1 = {"type": "hbar", "labels": list(top.index),
+                      "values": [int(v) for v in top.values]}
+        resultado["total_dosis"] = {
+            "valor": total_dosis,
+            "cols": f"{len(cols_dosis)} columnas de dosis",
+            "chart": chart1,
+        }
+
+        # ── KPI 2: Entidades — donut X/32 ──
+        n_entidades = int(df[c_entidad].dropna().nunique()) if c_entidad else None
+        resultado["entidades"] = {
+            "valor": n_entidades,
+            "cols": c_entidad,
+            "chart": {"type": "donut", "value": n_entidades, "total": 32,
+                      "label": "/ 32 estados"} if n_entidades else None,
+        }
+
+        # ── KPI 3: Municipios — donut X / total_en_dataset ──
+        n_mun = int(df[c_mun].dropna().nunique()) if c_mun else None
+        resultado["municipios"] = {
+            "valor": n_mun,
+            "cols": c_mun,
+            "chart": {"type": "donut", "value": n_mun, "total": 2469,
+                      "label": "/ 2,469 mun."} if n_mun else None,
+        }
+
+        # ── KPI 4: Establecimientos activos — donut activos/total ──
+        chart4 = None
+        if c_clues and cols_dosis:
+            df_num = df[cols_dosis].apply(pd.to_numeric, errors="coerce")
+            activos     = int(df.loc[df_num.sum(axis=1) > 0, c_clues].nunique())
+            total_clues = int(df[c_clues].nunique())
+            chart4 = {"type": "donut", "value": activos, "total": total_clues,
+                      "label": f"/ {total_clues} establecimientos"}
+            resultado["clues_activos"] = {
+                "valor": activos, "cols": c_clues,
+                "extra": f"de {total_clues} establecimientos totales",
+                "chart": chart4,
+            }
+        else:
+            resultado["clues_activos"] = {"valor": None, "cols": None, "chart": None}
+
+        # ── KPI 5: BCG — barras por mes ──
+        vbc = cols_prefijo("VBC")
+        serie_bcg = serie_por_mes(vbc)
+        resultado["dosis_bcg"] = {
+            "valor": suma_cols(vbc),
+            "cols": ", ".join(vbc) if vbc else None,
+            "chart": {
+                "type": "bar",
+                "labels": NOMBRES_MES,
+                "values": [serie_bcg.get(m, 0) for m in range(1, 13)],
+            } if serie_bcg else None,
+        }
+
+        # ── KPI 6: Hepatitis B — barras por mes ──
+        vhb = cols_prefijo("VHB")
+        serie_hb = serie_por_mes(vhb)
+        resultado["dosis_hepb"] = {
+            "valor": suma_cols(vhb),
+            "cols": ", ".join(vhb) if vhb else None,
+            "chart": {
+                "type": "bar",
+                "labels": NOMBRES_MES,
+                "values": [serie_hb.get(m, 0) for m in range(1, 13)],
+            } if serie_hb else None,
+        }
+
+        # ── KPI 7: VPH — barras por mes ──
+        vph = cols_prefijo("VPH")
+        serie_vph = serie_por_mes(vph)
+        resultado["dosis_vph"] = {
+            "valor": suma_cols(vph),
+            "cols": ", ".join(vph) if vph else None,
+            "chart": {
+                "type": "bar",
+                "labels": NOMBRES_MES,
+                "values": [serie_vph.get(m, 0) for m in range(1, 13)],
+            } if serie_vph else None,
+        }
+
+        # ── KPI 8: Rotavirus — barras por mes ──
+        vrv = cols_prefijo("VRV")
+        serie_rv = serie_por_mes(vrv)
+        resultado["dosis_rotavirus"] = {
+            "valor": suma_cols(vrv),
+            "cols": ", ".join(vrv) if vrv else None,
+            "chart": {
+                "type": "bar",
+                "labels": NOMBRES_MES,
+                "values": [serie_rv.get(m, 0) for m in range(1, 13)],
+            } if serie_rv else None,
+        }
+
+        # ── KPI 9: Meses con registros — barras todas las vacunas por mes ──
+        serie_total = serie_por_mes(cols_dosis)
+        n_meses = int(df[c_mes].dropna().nunique()) if c_mes else None
+        c_anio = col_exacta("ANIO")
+        n_anios = int(df[c_anio].dropna().nunique()) if c_anio else 1
+        resultado["meses_activos"] = {
+            "valor": n_meses,
+            "cols": c_mes,
+            "extra": f"en {n_anios} año(s) de datos",
+            "chart": {
+                "type": "bar",
+                "labels": NOMBRES_MES,
+                "values": [serie_total.get(m, 0) for m in range(1, 13)],
+            } if serie_total else None,
+        }
+
+        # ── KPI 10: Promedio por CLUES — hbar top-5 CLUES ──
+        chart10 = None
+        if c_clues and cols_dosis and total_dosis:
+            n_clues = int(df[c_clues].nunique())
+            promedio = round(total_dosis / n_clues, 1) if n_clues > 0 else None
+            tmp = df[[c_clues] + cols_dosis].copy()
+            for c in cols_dosis:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            top5 = (tmp.groupby(c_clues)[cols_dosis]
+                       .sum().sum(axis=1)
+                       .nlargest(5).sort_values())
+            # Truncar nombre CLUES a 12 caracteres
+            labels = [str(k)[:12] for k in top5.index]
+            chart10 = {"type": "hbar", "labels": labels,
+                       "values": [int(v) for v in top5.values]}
+            resultado["promedio_clues"] = {
+                "valor": promedio,
+                "cols": f"total / {n_clues} establecimientos",
+                "chart": chart10,
+            }
+        else:
+            resultado["promedio_clues"] = {"valor": None, "cols": None, "chart": None}
+
+        return resultado
+
+    def _crear_card_kpi(self, parent, defn, valor, col_usada, extra, fila, col_grid):
+        COLOR_GRIS = "#B0B8C9"
+        chart_data = defn.get("chart_data")
+
+        # ── Determinar color y texto de estado ──
+        if valor is None:
+            accent     = COLOR_GRIS
+            accent_dim = "#D8DCE5"
+            status_txt = "Sin datos"
+            valor_str  = "N/A"
+        else:
+            accent     = COLOR_GRIS
+            accent_dim = "#D8DCE5"
+            status_txt = ""
+            v = valor
+            if isinstance(v, float) and v == int(v):
+                v = int(v)
+            if isinstance(v, int) and v >= 1_000_000:
+                valor_str = f"{v / 1_000_000:.1f}M{defn['unidad']}"
+            elif isinstance(v, (int, float)) and v >= 1_000:
+                valor_str = f"{int(v):,}{defn['unidad']}"
+            else:
+                valor_str = f"{v}{defn['unidad']}"
+            for lo, hi, color, texto in defn["umbrales"]:
+                if valor >= lo and (hi is None or valor < hi):
+                    accent     = color
+                    accent_dim = color + "33"
+                    status_txt = texto
+                    break
+
+        # ── Card frame ──
+        card = tk.Frame(parent, bg=BLANCO, relief="flat",
+                        highlightbackground=GRIS_BORDE, highlightthickness=1)
+        card.grid(row=fila, column=col_grid, padx=8, pady=8, sticky="nsew")
+
+        tk.Frame(card, bg=accent, height=5).pack(fill="x")
+
+        content = tk.Frame(card, bg=BLANCO)
+        content.pack(fill="both", expand=True, padx=14, pady=(8, 10))
+
+        # ── Cabecera: número + título + valor ──
+        top_row = tk.Frame(content, bg=BLANCO)
+        top_row.pack(fill="x")
+
+        left = tk.Frame(top_row, bg=BLANCO)
+        left.pack(side="left", fill="y")
+
+        tk.Label(left, text=f"KPI {defn['n']}", font=("Segoe UI", 7, "bold"),
+                 bg=BLANCO, fg="#B0B8C9").pack(anchor="w")
+        tk.Label(left, text=defn["titulo"], font=("Segoe UI", 10, "bold"),
+                 bg=BLANCO, fg=TEXTO_OSCURO, wraplength=190,
+                 justify="left").pack(anchor="w")
+        if status_txt:
+            badge = tk.Frame(left, bg=accent)
+            tk.Label(badge, text=f"  {status_txt}  ",
+                     font=("Segoe UI", 7, "bold"),
+                     bg=accent, fg=BLANCO).pack(padx=1, pady=1)
+            badge.pack(anchor="w", pady=(3, 0))
+
+        right = tk.Frame(top_row, bg=BLANCO)
+        right.pack(side="right", anchor="n")
+        tk.Label(right, text=valor_str, font=("Segoe UI", 20, "bold"),
+                 bg=BLANCO, fg=accent).pack(anchor="e")
+
+        # ── Separador ──
+        tk.Frame(content, bg=GRIS_BORDE, height=1).pack(fill="x", pady=(6, 0))
+
+        # ── Gráfico ──
+        self._dibujar_chart(content, chart_data, accent)
+
+        # ── Pie de card ──
+        foot = tk.Frame(content, bg=BLANCO)
+        foot.pack(fill="x", pady=(4, 0))
+        hint = col_usada if col_usada else defn.get("hint", "")
+        if hint:
+            tk.Label(foot, text=hint, font=("Consolas", 7),
+                     bg=BLANCO, fg="#C0C8D5", wraplength=300,
+                     justify="left").pack(side="left")
+        if extra:
+            tk.Label(foot, text=extra, font=("Segoe UI", 7),
+                     bg=BLANCO, fg="#7A8499", wraplength=140,
+                     justify="right").pack(side="right")
+
+    def _dibujar_chart(self, parent, chart_data, accent):
+        if not MATPLOTLIB_OK or not chart_data:
+            return
+
+        tipo = chart_data.get("type")
+
+        try:
+            if tipo == "bar":
+                self._chart_bar(parent, chart_data, accent)
+            elif tipo == "donut":
+                self._chart_donut(parent, chart_data, accent)
+            elif tipo == "hbar":
+                self._chart_hbar(parent, chart_data, accent)
+        except Exception:
+            pass  # nunca romper la UI por un gráfico
+
+    def _fig_base(self, parent, w, h):
+        """Crea figura + canvas embebido. Devuelve (fig, ax)."""
+        fig = Figure(figsize=(w, h), dpi=82, facecolor=BLANCO)
+        ax  = fig.add_subplot(111, facecolor=BLANCO)
+        if not hasattr(self, '_dash_figures'):
+            self._dash_figures = []
+        self._dash_figures.append(fig)
+        canvas = FigureCanvasTkAgg(fig, master=parent)
+        canvas.get_tk_widget().pack(fill="x", pady=(6, 0))
+        return fig, ax, canvas
+
+    def _chart_bar(self, parent, data, accent):
+        labels = data["labels"]
+        values = data["values"]
+        if not any(values):
+            return
+        fig, ax, canvas = self._fig_base(parent, 4.2, 1.5)
+
+        x = range(len(labels))
+        bars = ax.bar(x, values, color=accent, alpha=0.85, width=0.65,
+                      edgecolor="none", zorder=3)
+        # Resaltar barra máxima
+        max_v = max(values)
+        for bar, v in zip(bars, values):
+            if v == max_v:
+                bar.set_alpha(1.0)
+                bar.set_edgecolor(accent)
+                bar.set_linewidth(1.2)
+
+        ax.set_xticks(list(x))
+        ax.set_xticklabels(labels, fontsize=6.5, color="#7A8499")
+        ax.set_yticks([])
+        ax.spines["left"].set_visible(False)
+        ax.spines["bottom"].set_color("#E8ECF3")
+        ax.tick_params(axis="x", length=0)
+        ax.grid(axis="y", color="#F0F0F0", zorder=0)
+        fig.tight_layout(pad=0.3)
+        canvas.draw()
+
+    def _chart_donut(self, parent, data, accent):
+        value = data.get("value") or 0
+        total = data.get("total") or 1
+        label = data.get("label", "")
+        fig, ax, canvas = self._fig_base(parent, 4.2, 1.7)
+
+        resto  = max(total - value, 0)
+        colors = [accent, "#EEF0F5"]
+        wedges, _ = ax.pie(
+            [value, resto], colors=colors,
+            startangle=90, counterclock=False,
+            wedgeprops=dict(width=0.45, edgecolor=BLANCO, linewidth=2)
+        )
+        pct = round(value / total * 100) if total else 0
+        ax.text(0, 0.08, f"{value}", ha="center", va="center",
+                fontsize=13, fontweight="bold", color=accent)
+        ax.text(0, -0.28, label, ha="center", va="center",
+                fontsize=6.5, color="#7A8499")
+        ax.text(0, -0.62, f"{pct}%", ha="center", va="center",
+                fontsize=8, fontweight="bold", color=accent)
+        fig.tight_layout(pad=0.2)
+        canvas.draw()
+
+    def _chart_hbar(self, parent, data, accent):
+        labels = data["labels"]
+        values = data["values"]
+        if not any(values):
+            return
+        n = len(labels)
+        fig, ax, canvas = self._fig_base(parent, 4.2, 0.38 * n + 0.4)
+
+        y      = range(n)
+        max_v  = max(values) or 1
+        colors = [accent if v == max_v else accent + "99" for v in values]
+        ax.barh(list(y), values, color=colors, edgecolor="none", height=0.55)
+        ax.set_yticks(list(y))
+        ax.set_yticklabels(labels, fontsize=6.5, color="#7A8499")
+        ax.set_xticks([])
+        ax.spines["bottom"].set_visible(False)
+        ax.spines["left"].set_color("#E8ECF3")
+        ax.tick_params(axis="y", length=0)
+        # Etiqueta de valor al final de cada barra
+        for i, v in enumerate(values):
+            s = f"{v/1_000_000:.1f}M" if v >= 1_000_000 else f"{v:,}"
+            ax.text(v + max_v * 0.02, i, s, va="center",
+                    fontsize=6, color="#7A8499")
+        ax.set_xlim(0, max_v * 1.25)
+        fig.tight_layout(pad=0.3)
+        canvas.draw()
 
     def _mostrar_placeholder(self):
         self.tabla.delete(*self.tabla.get_children())
@@ -1001,8 +1572,7 @@ class DSSVacunacionApp:
         self.mostrar_pantalla("transformar")
         self.progreso_transformar["value"] = 0
         self.lbl_paso_transformar.config(text="")
-        self.lbl_resultado_transform.config(text="")
-        self.btn_ver_datos.config(state="disabled")
+        self._activar_chip(0)
 
         # Iniciar simulación de transformación en hilo
         hilo = threading.Thread(target=self._proceso_transformacion, daemon=True)
@@ -1070,14 +1640,15 @@ class DSSVacunacionApp:
     def _actualizar_progreso_transformar(self, valor, texto):
         self.progreso_transformar["value"] = valor
         self.lbl_paso_transformar.config(text=texto)
+        chip_idx = min(int(valor / 100 * len(self._chips)), len(self._chips) - 1)
+        self._activar_chip(chip_idx)
 
     def _transformacion_completada(self, resultado):
-        self.lbl_resultado_transform.config(text=resultado)
-        self.btn_ver_datos.config(state="normal")
-        self._set_status("Transformacion completada -- Datos listos para visualizar")
-
-        # Preparar la pantalla Mostrar
+        self._activar_chip(len(self._chips))  # todos verdes
+        self._set_status("✓  Datos listos")
         self._preparar_pantalla_mostrar()
+        self.actualizar_dashboard()
+        self.root.after(900, lambda: self.mostrar_pantalla("mostrar"))
 
     def _preparar_pantalla_mostrar(self):
         # Poblar tabla con datos estructurados (+ columnas no estructuradas en tabla también)
