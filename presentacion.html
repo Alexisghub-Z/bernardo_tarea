@@ -4,1618 +4,1295 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>DSS-VacOaxaca — Presentación</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-  /* ─── Reset & Base ─── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --verde:   #00875A;
-    --verde2:  #00C07F;
-    --azul:    #003A70;
-    --azul2:   #00529B;
-    --blanco:  #FFFFFF;
-    --gris:    #F4F6F9;
-    --borde:   #D0D7E3;
-    --naranja: #FF6B2B;
-    --texto:   #1A2340;
-    --suave:   #7A8499;
-    --rojo:    #EF4444;
-    --amarillo:#F59E0B;
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  html, body {
-    width: 100%; height: 100%;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #0a0e1a;
-    overflow: hidden;
-  }
+/* ── El slide siempre mide 1280×720px internamente.
+      Un transform:scale() lo encaja al viewport. ── */
+html,body{
+  width:100%;height:100%;
+  background:#111;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  font-family:'Inter',sans-serif;
+}
 
-  /* ─── Slider ─── */
-  #slider {
-    width: 100%; height: 100vh;
-    position: relative;
-    overflow: hidden;
-  }
+#scaler{
+  /* Contenedor que se escala */
+  width:1280px;
+  height:720px;
+  position:relative;
+  transform-origin:center center;
+}
 
-  .slide {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    opacity: 0;
-    transform: translateX(60px);
-    transition: opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1);
-    pointer-events: none;
-  }
-  .slide.active {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: all;
-  }
-  .slide.exit-left {
-    opacity: 0;
-    transform: translateX(-60px);
-    transition: opacity .3s, transform .3s;
-  }
+.slide{
+  position:absolute;inset:0;
+  width:1280px;height:720px;
+  display:none;
+}
+.slide.active{display:flex}
 
-  /* ─── Nav arrows ─── */
-  .nav-btn {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 999;
-    background: rgba(255,255,255,.12);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,.2);
-    color: #fff;
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    font-size: 22px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .2s, transform .2s;
-    user-select: none;
-  }
-  .nav-btn:hover { background: rgba(255,255,255,.25); transform: translateY(-50%) scale(1.08); }
-  #prev { left: 18px; }
-  #next { right: 18px; }
-  #prev.hidden, #next.hidden { opacity: 0; pointer-events: none; }
+/* ── Nav ── */
+.nav{
+  position:fixed;top:50%;transform:translateY(-50%);
+  z-index:9999;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;width:48px;height:48px;
+  border-radius:50%;font-size:22px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;user-select:none;border:none;
+}
+.nav:hover{background:rgba(255,255,255,.3)}
+#prev{left:14px}#next{right:14px}
+.nav.hide{opacity:0;pointer-events:none}
 
-  /* ─── Progress bar ─── */
-  #progress-bar {
-    position: fixed; bottom: 0; left: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--verde2), var(--azul2));
-    transition: width .4s cubic-bezier(.4,0,.2,1);
-    z-index: 999;
-  }
-  #slide-counter {
-    position: fixed; bottom: 14px; right: 22px;
-    font-size: 14px; color: rgba(255,255,255,.5);
-    z-index: 999; font-weight: 600; letter-spacing: .5px;
-  }
+#dots{
+  position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;gap:7px;z-index:9999;
+}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.3);cursor:pointer;
+  transition:all .25s;
+}
+.dot.on{background:#fff;transform:scale(1.3)}
 
-  /* ─── Slide layouts ─── */
+#pbar{
+  position:fixed;bottom:0;left:0;height:3px;
+  background:#00C07F;transition:width .4s;z-index:9999;
+}
+#ctr{
+  position:fixed;bottom:12px;right:18px;
+  font-size:13px;color:rgba(255,255,255,.45);
+  font-family:'Inter',sans-serif;z-index:9999;
+}
 
-  /* PORTADA */
-  .slide-cover {
-    background: linear-gradient(135deg, #001d40 0%, #003A70 45%, #005C3D 100%);
-    justify-content: center; align-items: center;
-    text-align: center; padding: 40px;
-  }
-  .slide-cover .logo-ring {
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.08);
-    border: 2px solid rgba(0,192,127,.6);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 28px;
-    font-size: 52px;
-  }
-  .slide-cover h1 {
-    font-size: clamp(36px, 5vw, 68px);
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -1px;
-    line-height: 1.15;
-  }
-  .slide-cover h1 span { color: var(--verde2); }
-  .slide-cover .subtitle {
-    margin-top: 16px;
-    font-size: clamp(18px, 2.2vw, 26px);
-    color: rgba(255,255,255,.7);
-    font-weight: 400;
-  }
-  .slide-cover .meta-row {
-    margin-top: 40px;
-    display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
-  }
-  .meta-chip {
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 100px;
-    padding: 8px 20px;
-    font-size: 16px; color: rgba(255,255,255,.8);
-    font-weight: 500;
-  }
+/* Slide transition */
+.slide{opacity:0;pointer-events:none;transition:none}
+.slide.active{opacity:1;pointer-events:all}
 
-  /* DARK base slide */
-  .slide-dark {
-    background: #0d1526;
-    padding: 0;
-  }
-  .slide-dark .slide-header {
-    background: linear-gradient(90deg, #003A70, #00529B);
-    padding: 28px 60px;
-    display: flex; align-items: center; gap: 18px;
-  }
-  .slide-dark .slide-header .icon {
-    font-size: 32px;
-    background: rgba(255,255,255,.12);
-    width: 52px; height: 52px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .slide-dark .slide-header h2 {
-    font-size: clamp(24px, 3vw, 42px);
-    font-weight: 700; color: #fff;
-  }
-  .slide-dark .slide-header p {
-    font-size: 16px; color: rgba(255,255,255,.6); margin-top: 2px;
-  }
-  .slide-dark .body { padding: 36px 60px; flex: 1; overflow: auto; }
+/* ══ PALETA ══ */
+:root{
+  --teal:#007A5E;
+  --teal2:#00C07F;
+  --teal-bg:#E6F5F0;
+  --navy:#0B2D4E;
+  --navy2:#1A4A72;
+  --cream:#FAFAF7;
+  --paper:#F0EDE6;
+  --gold:#B8741A;
+  --gold2:#E8931F;
+  --ink:#1A2332;
+  --ink2:#3D4F60;
+  --muted:#7A8899;
+  --border:#D8D2C8;
+  --white:#FFFFFF;
+  --red:#C0392B;
+  --amber:#D97706;
+  --green:#15803D;
+}
 
-  /* LIGHT slide */
-  .slide-light {
-    background: var(--gris);
-    padding: 0;
-  }
-  .slide-light .slide-header {
-    background: var(--azul);
-    padding: 28px 60px;
-    display: flex; align-items: center; gap: 18px;
-  }
-  .slide-light .slide-header .icon {
-    font-size: 32px;
-    background: rgba(255,255,255,.12);
-    width: 52px; height: 52px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .slide-light .slide-header h2 {
-    font-size: clamp(24px, 3vw, 42px);
-    font-weight: 700; color: #fff;
-  }
-  .slide-light .slide-header p {
-    font-size: 16px; color: rgba(255,255,255,.6); margin-top: 2px;
-  }
-  .slide-light .body { padding: 36px 60px; flex: 1; overflow: auto; }
+/* ══ TIPOGRAFÍA (px fijos) ══ */
+.t-hero{font-family:'Playfair Display',serif;font-weight:900;font-size:72px;line-height:1.05;letter-spacing:-1px}
+.t-xl  {font-family:'Playfair Display',serif;font-weight:700;font-size:48px;line-height:1.1}
+.t-lg  {font-family:'Playfair Display',serif;font-weight:700;font-size:36px;line-height:1.15}
+.t-md  {font-family:'Playfair Display',serif;font-weight:700;font-size:26px;line-height:1.2}
+.t-sm  {font-family:'Inter',sans-serif;font-weight:600;font-size:16px}
+.body  {font-family:'Inter',sans-serif;font-weight:400;font-size:15px;line-height:1.65}
+.body-s{font-family:'Inter',sans-serif;font-weight:400;font-size:13px;line-height:1.6}
+.label {font-family:'Inter',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.mono  {font-family:'Courier New',monospace;font-size:13px}
 
-  /* ─── Cards ─── */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-  }
-  .card {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 16px;
-    padding: 24px 20px;
-    transition: transform .2s, box-shadow .2s;
-  }
-  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.3); }
-  .card.light {
-    background: #fff;
-    border: 1px solid var(--borde);
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  }
-  .card.light:hover { box-shadow: 0 8px 32px rgba(0,58,112,.12); }
-  .card .card-icon {
-    font-size: 28px; margin-bottom: 12px;
-    display: block;
-  }
-  .card .card-title {
-    font-size: 18px; font-weight: 700;
-    color: #fff; margin-bottom: 6px;
-  }
-  .card.light .card-title { color: var(--texto); }
-  .card .card-body {
-    font-size: 15px; color: rgba(255,255,255,.6);
-    line-height: 1.55;
-  }
-  .card.light .card-body { color: var(--suave); }
+/* ══ COLORES ══ */
+.c-white{color:#fff}.c-ink{color:var(--ink)}.c-ink2{color:var(--ink2)}
+.c-teal{color:var(--teal)}.c-teal2{color:var(--teal2)}.c-navy{color:var(--navy)}
+.c-gold{color:var(--gold)}.c-muted{color:var(--muted)}
 
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 100px;
-    font-size: 13px; font-weight: 700;
-    margin-right: 5px; margin-bottom: 5px;
-  }
-  .badge-verde  { background: rgba(0,135,90,.2);  color: var(--verde2); }
-  .badge-azul   { background: rgba(0,82,155,.2);  color: #60a5fa; }
-  .badge-naranja{ background: rgba(255,107,43,.2);color: var(--naranja); }
-  .badge-gris   { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); }
+/* ══ PILLS ══ */
+.pill{display:inline-flex;align-items:center;padding:5px 14px;border-radius:100px;font-size:13px;font-weight:600}
+.pill-w {background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.pill-teal{background:var(--teal-bg);color:var(--teal)}
+.pill-navy{background:rgba(11,45,78,.1);color:var(--navy)}
+.pill-gold{background:rgba(184,116,26,.1);color:var(--gold)}
+.pill-dark{background:rgba(255,255,255,.09);color:rgba(255,255,255,.75)}
+.pill-red{background:rgba(192,57,43,.12);color:var(--red)}
 
-  /* ─── Timeline / steps ─── */
-  .steps { display: flex; flex-direction: column; gap: 16px; }
-  .step {
-    display: flex; gap: 16px; align-items: flex-start;
-  }
-  .step-num {
-    min-width: 38px; height: 38px;
-    border-radius: 50%;
-    background: var(--verde);
-    color: #fff; font-weight: 800; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .step-content h4 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .step-content p  { font-size: 15px; color: rgba(255,255,255,.6); line-height: 1.5; }
+/* ══ CARDS ══ */
+.cw{background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px}
+.cd{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px}
+.cw:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
 
-  /* ─── KPI cards ─── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
-  }
-  .kpi-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 18px 16px;
-    border-left: 4px solid var(--verde);
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  }
-  .kpi-card .kpi-num {
-    font-size: 13px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .5px; color: var(--suave); margin-bottom: 6px;
-  }
-  .kpi-card .kpi-title {
-    font-size: 15px; font-weight: 700; color: var(--texto);
-    line-height: 1.35; margin-bottom: 6px;
-  }
-  .kpi-card .kpi-hint {
-    font-size: 13px; color: var(--suave);
-  }
-  .kpi-card.verde { border-left-color: var(--verde); }
-  .kpi-card.azul  { border-left-color: var(--azul2); }
-  .kpi-card.naranja{ border-left-color: var(--naranja); }
+.abar{height:3px;border-radius:2px;margin-bottom:12px}
+.abar-t{background:var(--teal2)}
+.abar-n{background:var(--navy2)}
+.abar-g{background:var(--gold2)}
 
-  /* ─── Arch diagram ─── */
-  .arch-box {
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 14px;
-    padding: 18px 22px;
-    text-align: center;
-  }
-  .arch-box .arch-icon { font-size: 30px; margin-bottom: 8px; display: block; }
-  .arch-box .arch-label { font-size: 15px; font-weight: 700; color: #fff; }
-  .arch-box .arch-sub   { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 4px; }
+/* ══ KPI chip ══ */
+.kc{background:#fff;border-radius:10px;border-left:4px solid var(--teal);padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.kc-n{border-left-color:var(--navy)}
+.kc-g{border-left-color:var(--gold)}
+.kc-p{border-left-color:#7C3AED}
+.kc .n{font-family:'Playfair Display',serif;font-weight:900;font-size:11px;color:var(--teal);margin-bottom:2px}
+.kc-n .n{color:var(--navy)}.kc-g .n{color:var(--gold)}.kc-p .n{color:#7C3AED}
+.kc .ttl{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:2px}
+.kc .sub{font-size:11px;color:var(--muted)}
 
-  .arrow-row {
-    display: flex; align-items: center; justify-content: center;
-    gap: 8px; padding: 8px 0;
-  }
-  .arrow { font-size: 22px; color: var(--verde2); }
+/* ══ Step circle ══ */
+.sc{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:15px;flex-shrink:0;color:#fff;background:var(--teal)}
 
-  /* ─── Two-column ─── */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; height: 100%; }
-  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+/* ══ Grids ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.col{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;gap:12px}
 
-  /* ─── Tables ─── */
-  .data-table { width: 100%; border-collapse: collapse; }
-  .data-table th {
-    background: var(--azul);
-    color: #fff; font-size: 14px; font-weight: 700;
-    padding: 10px 14px; text-align: left;
-    text-transform: uppercase; letter-spacing: .5px;
-  }
-  .data-table td {
-    padding: 10px 14px; font-size: 15px;
-    border-bottom: 1px solid var(--borde);
-    color: var(--texto);
-  }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: rgba(0,58,112,.04); }
+/* ETL */
+.etl-bar{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr;border-radius:10px;overflow:hidden}
+.etl-b{padding:18px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+.etl-arrow{display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(255,255,255,.5);background:rgba(0,0,0,.15)}
 
-  /* ─── Tags row ─── */
-  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tag {
-    padding: 5px 14px; border-radius: 100px;
-    font-size: 14px; font-weight: 700;
-  }
+/* Table */
+.dt{width:100%;border-collapse:collapse;font-size:13px}
+.dt th{background:var(--navy);color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:12px;letter-spacing:.04em}
+.dt td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--ink2)}
+.dt tr:last-child td{border:none}
 
-  /* ─── Code block ─── */
-  .code-block {
-    background: #0d1117;
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 12px;
-    padding: 20px 24px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 15px;
-    color: #e5e7eb;
-    line-height: 1.7;
-    overflow: auto;
-  }
-  .code-block .kw  { color: #ff79c6; }
-  .code-block .str { color: #f1fa8c; }
-  .code-block .fn  { color: #50fa7b; }
-  .code-block .cm  { color: #6272a4; }
-  .code-block .num { color: #bd93f9; }
+/* anim */
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.slide.active .ai{animation:up .4s cubic-bezier(.4,0,.2,1) both}
+.slide.active .ai:nth-child(1){animation-delay:.05s}
+.slide.active .ai:nth-child(2){animation-delay:.1s}
+.slide.active .ai:nth-child(3){animation-delay:.15s}
+.slide.active .ai:nth-child(4){animation-delay:.2s}
+.slide.active .ai:nth-child(5){animation-delay:.25s}
+.slide.active .ai:nth-child(6){animation-delay:.3s}
+.slide.active .ai:nth-child(7){animation-delay:.35s}
+.slide.active .ai:nth-child(8){animation-delay:.4s}
+.slide.active .ai:nth-child(9){animation-delay:.45s}
 
-  /* ─── Divider ─── */
-  .divider {
-    height: 1px; background: rgba(255,255,255,.08);
-    margin: 20px 0;
-  }
-  .divider.light { background: var(--borde); }
-
-  /* ─── Big number ─── */
-  .big-stat {
-    font-size: clamp(32px, 4vw, 56px);
-    font-weight: 900;
-    line-height: 1;
-  }
-
-  /* ─── ETL Flow ─── */
-  .etl-flow {
-    display: flex; gap: 0; align-items: stretch;
-    border-radius: 16px; overflow: hidden;
-  }
-  .etl-step {
-    flex: 1; padding: 24px 16px;
-    display: flex; flex-direction: column; align-items: center;
-    text-align: center; gap: 10px;
-  }
-  .etl-step .etl-icon { font-size: 36px; }
-  .etl-step .etl-label { font-size: 17px; font-weight: 800; color: #fff; }
-  .etl-step .etl-desc  { font-size: 14px; color: rgba(255,255,255,.7); line-height: 1.5; }
-  .etl-E { background: var(--azul); }
-  .etl-T { background: #005C3D; }
-  .etl-L { background: #7c3aed; }
-  .etl-arrow {
-    width: 30px; background: rgba(255,255,255,.06);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; color: rgba(255,255,255,.5);
-  }
-
-  /* ─── Feature list ─── */
-  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-  .feature-list li {
-    display: flex; align-items: center; gap: 12px;
-    font-size: 17px; color: rgba(255,255,255,.8);
-  }
-  .feature-list li .bullet {
-    min-width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--verde2);
-    display: inline-block;
-  }
-  .feature-list.dark-text li { color: var(--texto); }
-  .feature-list.dark-text li .bullet { background: var(--verde); }
-
-  /* ─── Scrollbar ─── */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 10px; }
-
-  /* ─── Pulse animation ─── */
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
-  .pulse { animation: pulse 2s infinite; }
-
-  /* ─── Slide-in chips ─── */
-  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
-  .slide.active .anim-item {
-    animation: fadeUp .5s cubic-bezier(.4,0,.2,1) both;
-  }
-  .slide.active .anim-item:nth-child(1){animation-delay:.05s}
-  .slide.active .anim-item:nth-child(2){animation-delay:.12s}
-  .slide.active .anim-item:nth-child(3){animation-delay:.19s}
-  .slide.active .anim-item:nth-child(4){animation-delay:.26s}
-  .slide.active .anim-item:nth-child(5){animation-delay:.33s}
-  .slide.active .anim-item:nth-child(6){animation-delay:.40s}
-  .slide.active .anim-item:nth-child(7){animation-delay:.47s}
-  .slide.active .anim-item:nth-child(8){animation-delay:.54s}
-  .slide.active .anim-item:nth-child(9){animation-delay:.61s}
-  .slide.active .anim-item:nth-child(10){animation-delay:.68s}
-
-  /* ─── Dots indicator ─── */
-  #dots {
-    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 7px; z-index: 999;
-  }
-  .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,.2);
-    transition: background .3s, transform .3s;
-    cursor: pointer;
-  }
-  .dot.active { background: var(--verde2); transform: scale(1.3); }
-
-  /* tech stack icons */
-  .tech-logo {
-    font-size: 40px;
-    display: block;
-    text-align: center;
-    margin-bottom: 8px;
-  }
+::-webkit-scrollbar{display:none}
 </style>
 </head>
 <body>
+<div id="scaler">
 
-<div id="slider">
+<!-- ═══════════════════════════════════════════
+     1 · PORTADA
+═══════════════════════════════════════════ -->
+<div class="slide active" style="flex-direction:row">
 
-  <!-- ══════════════════════════════ SLIDE 1 PORTADA ══ -->
-  <div class="slide slide-cover active" data-index="0">
-    <div class="logo-ring">💉</div>
-    <h1>DSS-VacOaxaca<br/><span>2010 – 2026</span></h1>
-    <p class="subtitle">Sistema de Soporte a Decisiones para Vacunación<br/>Módulo ETL + Dashboard de KPIs</p>
-    <div class="meta-row">
-      <span class="meta-chip">🏛️ Instituto Tecnológico de Oaxaca</span>
-      <span class="meta-chip">💻 Ingeniería en Sistemas Computacionales</span>
-      <span class="meta-chip">🎓 Octavo Semestre</span>
-    </div>
-    <div class="meta-row" style="margin-top:16px">
-      <span class="meta-chip" style="background:rgba(0,192,127,.15);border-color:rgba(0,192,127,.3);color:#00C07F">Python</span>
-      <span class="meta-chip" style="background:rgba(0,192,127,.15);border-color:rgba(0,192,127,.3);color:#00C07F">Tkinter</span>
-      <span class="meta-chip" style="background:rgba(0,192,127,.15);border-color:rgba(0,192,127,.3);color:#00C07F">MongoDB</span>
-      <span class="meta-chip" style="background:rgba(0,192,127,.15);border-color:rgba(0,192,127,.3);color:#00C07F">Pandas</span>
-      <span class="meta-chip" style="background:rgba(0,192,127,.15);border-color:rgba(0,192,127,.3);color:#00C07F">Matplotlib</span>
-    </div>
-    <div style="margin-top:24px;background:rgba(0,192,127,.1);border:1px solid rgba(0,192,127,.3);border-radius:16px;padding:18px 28px;max-width:640px;text-align:left">
-      <p style="font-size:12px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:10px">¿Qué hace este sistema?</p>
-      <p style="font-size:15px;color:rgba(255,255,255,.88);line-height:1.7">Lee archivos Excel con registros de vacunación de toda la República, los limpia y organiza automáticamente, los guarda en la nube y muestra un <strong style="color:var(--verde2)">dashboard con indicadores</strong> para detectar dónde falta cobertura.</p>
-    </div>
-    <div style="margin-top:24px;border-top:1px solid rgba(255,255,255,.12);padding-top:20px;width:100%;max-width:600px">
-      <p style="font-size:13px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:14px">Integrantes</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <p style="font-size:17px;color:rgba(255,255,255,.9);font-weight:500">👤 Cristian Neftali Hernandez Ramirez</p>
-        <p style="font-size:17px;color:rgba(255,255,255,.9);font-weight:500">👤 Shalom Tellez Hernandez</p>
-        <p style="font-size:17px;color:rgba(255,255,255,.9);font-weight:500">👤 Alexis Gabriel Zarate Garcia</p>
+  <!-- Panel izquierdo verde -->
+  <div style="width:480px;background:var(--teal);display:flex;flex-direction:column;justify-content:center;padding:60px 52px;position:relative;overflow:hidden;flex-shrink:0">
+    <!-- círculos decorativos -->
+    <div style="position:absolute;top:-80px;right:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.07)"></div>
+    <div style="position:absolute;bottom:-60px;left:-60px;width:180px;height:180px;border-radius:50%;background:rgba(0,0,0,.1)"></div>
+
+    <!-- ícono vacuna SVG -->
+    <div style="position:relative;z-index:1">
+      <svg width="72" height="72" viewBox="0 0 72 72" fill="none" style="margin-bottom:28px;display:block">
+        <circle cx="36" cy="36" r="36" fill="rgba(255,255,255,.12)"/>
+        <!-- cruz médica -->
+        <rect x="20" y="32" width="32" height="8" rx="4" fill="white" opacity=".9"/>
+        <rect x="32" y="20" width="8" height="32" rx="4" fill="white" opacity=".9"/>
+        <!-- aguja diagonal -->
+        <line x1="52" y1="22" x2="62" y2="12" stroke="white" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        <circle cx="64" cy="10" r="4" fill="white" opacity=".6"/>
+      </svg>
+
+      <div class="label" style="color:rgba(255,255,255,.6);margin-bottom:12px">Instituto Tecnológico de Oaxaca</div>
+      <div class="t-hero" style="color:#fff;margin-bottom:10px">DSS-<br/>Vac<br/>Oaxaca</div>
+      <div style="font-size:17px;color:rgba(255,255,255,.8);font-weight:300;margin-bottom:32px">Sistema de Soporte a Decisiones<br/>para Vacunación Nacional</div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        <span class="pill pill-w">Python</span>
+        <span class="pill pill-w">Pandas</span>
+        <span class="pill pill-w">MongoDB</span>
+        <span class="pill pill-w">Tkinter</span>
+        <span class="pill pill-w">Matplotlib</span>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ SLIDE 2 QUÉ ES ══ -->
-  <div class="slide slide-cover" style="background:linear-gradient(135deg,#003A70 0%,#00529B 50%,#005C3D 100%)" data-index="1">
-    <div style="max-width:880px;margin:0 auto;text-align:center;padding:20px">
-      <div style="font-size:52px;margin-bottom:20px">💉📊</div>
-      <h1 style="font-size:clamp(24px,3.5vw,50px);color:#fff;font-weight:800;line-height:1.2;margin-bottom:14px">
-        ¿De qué trata este sistema?
-      </h1>
-      <p style="font-size:clamp(14px,1.8vw,19px);color:rgba(255,255,255,.82);line-height:1.75;max-width:680px;margin:0 auto 32px">
-        En México, los datos de vacunación llegan en miles de archivos Excel distintos. Nadie sabe fácilmente cuántas vacunas se aplicaron, en qué municipios falta cobertura o cuáles establecimientos están inactivos.
-      </p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px;text-align:left">
-        <div class="anim-item" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:16px;padding:22px">
-          <div style="font-size:36px;margin-bottom:12px">😩</div>
-          <div style="color:#fca5a5;font-weight:700;font-size:15px;margin-bottom:8px">El problema</div>
-          <div style="color:rgba(255,255,255,.7);font-size:13px;line-height:1.65">Archivos separados, formatos inconsistentes y sin un lugar centralizado para consultar la información.</div>
+  <!-- Panel derecho oscuro -->
+  <div style="flex:1;background:var(--navy);display:flex;flex-direction:column;justify-content:center;padding:60px 52px;position:relative;overflow:hidden">
+    <!-- mapa México decorativo SVG -->
+    <svg viewBox="0 0 500 380" style="position:absolute;inset:0;width:100%;height:100%;opacity:.06" fill="none">
+      <path d="M60 80 L180 50 L280 90 L380 60 L430 140 L400 240 L340 310 L240 340 L140 310 L80 220 Z" stroke="white" stroke-width="2"/>
+      <path d="M130 120 L220 105 L290 145 L265 230 L180 260 L120 215 Z" stroke="white" stroke-width="1.5"/>
+      <circle cx="215" cy="175" r="10" fill="white"/>
+      <circle cx="165" cy="195" r="6" fill="white"/>
+      <circle cx="255" cy="155" r="6" fill="white"/>
+      <circle cx="200" cy="225" r="5" fill="white"/>
+      <circle cx="245" cy="200" r="5" fill="white"/>
+    </svg>
+
+    <div style="position:relative;z-index:1">
+      <div class="label" style="color:rgba(255,255,255,.4);margin-bottom:24px">Equipo de desarrollo · 2026</div>
+
+      <div class="col" style="gap:14px;margin-bottom:40px">
+        <div class="ai" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="12" r="8" fill="rgba(255,255,255,.2)"/><path d="M4 32c0-7.73 6.27-14 14-14s14 6.27 14 14" stroke="rgba(255,255,255,.2)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <div>
+            <div style="font-size:16px;color:#fff;font-weight:600">Cristian Neftali Hernandez Ramirez</div>
+          </div>
         </div>
-        <div class="anim-item" style="background:rgba(0,192,127,.1);border:1px solid rgba(0,192,127,.25);border-radius:16px;padding:22px">
-          <div style="font-size:36px;margin-bottom:12px">⚙️</div>
-          <div style="color:var(--verde2);font-weight:700;font-size:15px;margin-bottom:8px">Lo que hace el sistema</div>
-          <div style="color:rgba(255,255,255,.7);font-size:13px;line-height:1.65">Lee los archivos, limpia y estandariza los datos automáticamente, y los guarda en una base de datos en la nube.</div>
+        <div class="ai" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="12" r="8" fill="rgba(255,255,255,.2)"/><path d="M4 32c0-7.73 6.27-14 14-14s14 6.27 14 14" stroke="rgba(255,255,255,.2)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <div>
+            <div style="font-size:16px;color:#fff;font-weight:600">Shalom Tellez Hernandez</div>
+          </div>
         </div>
-        <div class="anim-item" style="background:rgba(0,82,155,.15);border:1px solid rgba(0,82,155,.3);border-radius:16px;padding:22px">
-          <div style="font-size:36px;margin-bottom:12px">📊</div>
-          <div style="color:#60a5fa;font-weight:700;font-size:15px;margin-bottom:8px">El resultado</div>
-          <div style="color:rgba(255,255,255,.7);font-size:13px;line-height:1.65">Un dashboard con gráficas e indicadores para saber de un vistazo cómo va la vacunación en cada estado y municipio.</div>
+        <div class="ai" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="12" r="8" fill="rgba(255,255,255,.2)"/><path d="M4 32c0-7.73 6.27-14 14-14s14 6.27 14 14" stroke="rgba(255,255,255,.2)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <div>
+            <div style="font-size:16px;color:#fff;font-weight:600">Alexis Gabriel Zarate Garcia</div>
+          </div>
         </div>
       </div>
-      <div class="anim-item" style="background:rgba(0,192,127,.12);border:1px solid rgba(0,192,127,.3);border-radius:14px;padding:16px 28px;max-width:640px;margin:0 auto">
-        <p style="font-size:15px;color:rgba(255,255,255,.92);line-height:1.65">
-          <strong style="color:var(--verde2)">En una oración:</strong> es una aplicación de escritorio que convierte archivos de vacunación desordenados en información clara para tomar decisiones de salud pública.
-        </p>
+
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:24px">
+        <div class="label" style="color:rgba(255,255,255,.35);margin-bottom:8px">Ingeniería en Sistemas Computacionales · 8° Semestre</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.55)">Oaxaca, México &nbsp;·&nbsp; 2010 – 2026</div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ══════════════════════════════ SLIDE 3 PROBLEMÁTICA ══ -->
-  <div class="slide slide-dark" data-index="1">
-    <div class="slide-header">
-      <div class="icon">🩺</div>
-      <div>
-        <h2>Problemática</h2>
-        <p>¿Por qué existe este sistema?</p>
-      </div>
+
+<!-- ═══════════════════════════════════════════
+     2 · PROBLEMÁTICA
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:row">
+
+  <!-- Panel izquierdo ilustración -->
+  <div style="width:440px;background:var(--navy);position:relative;overflow:hidden;flex-shrink:0">
+    <svg viewBox="0 0 440 720" width="440" height="720" fill="none" style="position:absolute;inset:0">
+      <rect width="440" height="720" fill="#0B2D4E"/>
+      <!-- líneas de cuadrícula -->
+      <line x1="0" y1="180" x2="440" y2="180" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="0" y1="360" x2="440" y2="360" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="0" y1="540" x2="440" y2="540" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="150" y1="0" x2="150" y2="720" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="300" y1="0" x2="300" y2="720" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <!-- Archivos apilados -->
+      <rect x="60" y="400" width="220" height="160" rx="10" fill="#1A4A72" stroke="rgba(255,255,255,.1)" stroke-width="1.5"/>
+      <rect x="80" y="375" width="220" height="160" rx="10" fill="#1A4A72" stroke="rgba(255,255,255,.13)" stroke-width="1.5"/>
+      <rect x="100" y="350" width="220" height="160" rx="10" fill="#236090" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
+      <line x1="124" y1="385" x2="296" y2="385" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="124" y1="405" x2="260" y2="405" stroke="rgba(255,255,255,.14)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="124" y1="425" x2="280" y2="425" stroke="rgba(255,255,255,.14)" stroke-width="2" stroke-linecap="round"/>
+      <text x="112" y="470" fill="rgba(255,255,255,.2)" font-size="12" font-family="Courier New">datos_2024.xlsx</text>
+      <text x="112" y="486" fill="rgba(255,255,255,.12)" font-size="11" font-family="Courier New">oax_enero.csv</text>
+      <text x="112" y="502" fill="rgba(255,255,255,.1)" font-size="11" font-family="Courier New">informe.pdf</text>
+      <!-- X grande -->
+      <circle cx="300" cy="200" r="90" fill="rgba(192,57,43,.12)" stroke="rgba(192,57,43,.35)" stroke-width="2"/>
+      <line x1="260" y1="160" x2="340" y2="240" stroke="#E74C3C" stroke-width="5" stroke-linecap="round"/>
+      <line x1="340" y1="160" x2="260" y2="240" stroke="#E74C3C" stroke-width="5" stroke-linecap="round"/>
+      <!-- labels -->
+      <text x="220" y="640" text-anchor="middle" fill="rgba(255,255,255,.15)" font-size="12" font-family="Inter,sans-serif" letter-spacing="2" font-weight="700">DATOS DISPERSOS</text>
+    </svg>
+
+    <!-- texto superpuesto -->
+    <div style="position:absolute;top:52px;left:48px;right:48px">
+      <div class="label" style="color:rgba(255,255,255,.4);margin-bottom:12px">02 · El problema</div>
+      <div class="t-xl" style="color:#fff;line-height:1.15">¿Por qué<br/>existe este<br/>sistema?</div>
     </div>
-    <div class="body">
-      <div class="two-col" style="align-items:start;gap:40px">
+  </div>
+
+  <!-- Panel derecho contenido -->
+  <div style="flex:1;background:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:56px 52px">
+    <div class="col" style="gap:20px">
+
+      <div class="ai" style="display:flex;gap:16px;align-items:flex-start;background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+        <div class="sc" style="background:#C0392B;font-size:16px">1</div>
         <div>
-          <div class="steps">
-            <div class="step anim-item">
-              <div class="step-num">1</div>
-              <div class="step-content">
-                <h4>Información repartida en muchos archivos</h4>
-                <p>Los registros de vacunación llegan en distintos formatos: Excel, CSV, PDF, TXT, JSON. No hay un solo lugar donde consultarlos todos.</p>
-              </div>
-            </div>
-            <div class="step anim-item">
-              <div class="step-num">2</div>
-              <div class="step-content">
-                <h4>No se sabe en tiempo real cómo va la vacunación</h4>
-                <p>Quienes toman decisiones no tienen números actualizados sobre cuántas dosis se aplicaron, en qué estados o cuántos establecimientos siguen activos.</p>
-              </div>
-            </div>
-            <div class="step anim-item">
-              <div class="step-num">3</div>
-              <div class="step-content">
-                <h4>Los datos se quedan atrapados en archivos locales</h4>
-                <p>Sin base de datos central, la información no tiene respaldo, no se puede rastrear y es imposible comparar datos históricos.</p>
-              </div>
-            </div>
-            <div class="step anim-item">
-              <div class="step-num">4</div>
-              <div class="step-content">
-                <h4>El mismo estado escrito de 10 formas distintas</h4>
-                <p>"Oax", "OAX", "oaxaca", "Oaxaca de Juárez"... cada archivo usa su propio estilo, lo que hace imposible comparar datos entre entidades.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:20px">
-          <div class="card anim-item" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)">
-            <span class="card-icon">📊</span>
-            <div class="card-title" style="color:#fca5a5">Impacto en Salud Pública</div>
-            <div class="card-body" style="color:rgba(252,165,165,.7)">
-              Sin datos consolidados, los programas de vacunación no pueden identificar municipios rezagados ni planificar campañas focalizadas en Oaxaca y los 32 estados.
-            </div>
-          </div>
-          <div class="card anim-item" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2)">
-            <span class="card-icon">⚠️</span>
-            <div class="card-title" style="color:#fcd34d">Escala del reto</div>
-            <div class="card-body" style="color:rgba(253,211,77,.7)">
-              Más de <strong style="color:#fcd34d">50,000 registros</strong> por archivo, <strong style="color:#fcd34d">2,469 municipios</strong> y <strong style="color:#fcd34d">32 entidades</strong> federativas requieren procesamiento eficiente y sin pérdida de información.
-            </div>
-          </div>
-          <div class="card anim-item" style="background:rgba(0,135,90,.08);border-color:rgba(0,135,90,.3)">
-            <span class="card-icon">🎯</span>
-            <div class="card-title" style="color:var(--verde2)">Solución propuesta</div>
-            <div class="card-body" style="color:rgba(0,192,127,.7)">
-              DSS-VacOaxaca: una aplicación de escritorio que unifica extracción, transformación, carga y visualización de datos de vacunación en un solo flujo ETL.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ SLIDE 3 OBJETIVO ══ -->
-  <div class="slide slide-cover" style="background:linear-gradient(135deg,#003A70,#005C3D)" data-index="2">
-    <div style="max-width:860px;margin:0 auto;text-align:center">
-      <div style="font-size:56px;margin-bottom:24px">🎯</div>
-      <h1 style="font-size:clamp(20px,3vw,42px);color:#fff;font-weight:800;line-height:1.25;margin-bottom:24px">
-        Desarrollar un Sistema de Soporte a Decisiones<br/>
-        <span style="color:var(--verde2)">que unifique, procese y visualice</span><br/>
-        datos de vacunación a nivel nacional
-      </h1>
-      <p style="font-size:clamp(13px,1.5vw,17px);color:rgba(255,255,255,.75);line-height:1.7;max-width:660px;margin:0 auto 32px">
-        Permitiendo a operadores y tomadores de decisiones
-        analizar coberturas, dosis aplicadas e indicadores clave
-        mediante un pipeline ETL automatizado y un dashboard interactivo.
-      </p>
-      <div class="meta-row">
-        <span class="meta-chip" style="border-color:rgba(0,192,127,.4);color:var(--verde2)">✅ Extraer datos de Excel / CSV</span>
-        <span class="meta-chip" style="border-color:rgba(0,192,127,.4);color:var(--verde2)">✅ Integrar fuentes no estructuradas</span>
-        <span class="meta-chip" style="border-color:rgba(0,192,127,.4);color:var(--verde2)">✅ Persistir en MongoDB</span>
-        <span class="meta-chip" style="border-color:rgba(0,192,127,.4);color:var(--verde2)">✅ Calcular 10 KPIs clave</span>
-        <span class="meta-chip" style="border-color:rgba(0,192,127,.4);color:var(--verde2)">✅ Visualizar dashboard</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ SLIDE 4 ARQUITECTURA ══ -->
-  <div class="slide slide-dark" data-index="3">
-    <div class="slide-header">
-      <div class="icon">🏗️</div>
-      <div>
-        <h2>Arquitectura del Sistema</h2>
-        <p>Componentes y flujo de datos principal</p>
-      </div>
-    </div>
-    <div class="body">
-      <div style="background:rgba(0,82,155,.12);border:1px solid rgba(0,82,155,.25);border-radius:12px;padding:12px 18px;margin-bottom:18px">
-        <p style="font-size:14px;color:rgba(255,255,255,.82);line-height:1.6"><strong style="color:#60a5fa">Flujo general:</strong> el usuario abre un archivo → el motor ETL lo procesa → los datos limpios se guardan en MongoDB en la nube → la interfaz gráfica muestra los resultados y gráficas en tiempo real.</p>
-      </div>
-      <!-- Top row -->
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:center;margin-bottom:20px">
-        <div class="arch-box anim-item" style="border-color:rgba(0,82,155,.4);background:rgba(0,58,112,.2)">
-          <span class="arch-icon">📁</span>
-          <div class="arch-label">Fuentes Entrada</div>
-          <div class="arch-sub">Excel · CSV · TXT · JSON · PDF</div>
-        </div>
-        <div class="anim-item" style="text-align:center;font-size:28px;color:var(--verde2)">→</div>
-        <div class="arch-box anim-item" style="border-color:rgba(0,135,90,.4);background:rgba(0,92,61,.2)">
-          <span class="arch-icon">⚙️</span>
-          <div class="arch-label">ETL Engine</div>
-          <div class="arch-sub">Extract · Transform · Load</div>
-        </div>
-        <div class="anim-item" style="text-align:center;font-size:28px;color:var(--verde2)">→</div>
-        <div class="arch-box anim-item" style="border-color:rgba(124,58,237,.4);background:rgba(76,29,149,.2)">
-          <span class="arch-icon">🍃</span>
-          <div class="arch-label">MongoDB Atlas</div>
-          <div class="arch-sub">vacunacion_db</div>
+          <div class="t-sm c-ink" style="margin-bottom:5px">Información repartida en muchos archivos</div>
+          <div class="body-s c-muted">Excel, CSV, PDF, TXT, JSON — sin lugar centralizado para consultarlos todos juntos.</div>
         </div>
       </div>
 
-      <div class="divider"></div>
-
-      <!-- Bottom row -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
-        <div class="card anim-item">
-          <span class="card-icon">🖥️</span>
-          <div class="card-title">GUI Tkinter</div>
-          <div class="card-body">Interfaz de escritorio multiplataforma con ttkbootstrap. 4 pantallas: Extraer, Transformar, Mostrar, Dashboard.</div>
-        </div>
-        <div class="card anim-item">
-          <span class="card-icon">🐼</span>
-          <div class="card-title">Pandas DataFrame</div>
-          <div class="card-body">Motor de procesamiento tabular. Homogeneización, normalización y agregación de datos. Soporte para chunks de 10K registros.</div>
-        </div>
-        <div class="card anim-item">
-          <span class="card-icon">📈</span>
-          <div class="card-title">Matplotlib</div>
-          <div class="card-body">Visualizaciones embebidas en la UI: barras horizontales, donuts y series por mes para cada KPI.</div>
-        </div>
-        <div class="card anim-item">
-          <span class="card-icon">🔒</span>
-          <div class="card-title">Threading</div>
-          <div class="card-body">Procesamiento en hilos independientes para no bloquear la UI durante operaciones pesadas sobre archivos grandes.</div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-      <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-        <span style="font-size:13px;color:rgba(255,255,255,.5)">Módulos principales:</span>
-        <span class="badge badge-azul">dss_vacunacion.py — Núcleo UI + Lógica ETL</span>
-        <span class="badge badge-verde">mongodb_connector.py — Capa de datos</span>
-        <span class="badge badge-gris">Colecciones: vacunas · registros_extraccion</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ SLIDE 5 FUENTES INTERNAS ══ -->
-  <div class="slide slide-light" data-index="4">
-    <div class="slide-header">
-      <div class="icon">📂</div>
-      <div>
-        <h2>Fuentes de Datos Internas</h2>
-        <p>Datos estructurados del sistema de vacunación nacional</p>
-      </div>
-    </div>
-    <div class="body">
-      <div class="two-col" style="align-items:start">
+      <div class="ai" style="display:flex;gap:16px;align-items:flex-start;background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+        <div class="sc" style="background:#D97706">2</div>
         <div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-            <span style="font-size:24px">📊</span>
-            <h3 style="font-size:18px;color:var(--azul);font-weight:700">Archivos Excel / CSV</h3>
-          </div>
-          <p style="font-size:14px;color:var(--suave);line-height:1.6;margin-bottom:18px">
-            Los archivos principales provienen del <strong style="color:var(--texto)">Sistema de Información en Salud (SIS)</strong> de la Secretaría de Salud. Contienen el registro histórico de vacunación por municipio, establecimiento y mes (2010–2026).
-          </p>
-
-          <table class="data-table" style="background:#fff;border-radius:12px;overflow:hidden;font-size:12px">
-            <thead>
-              <tr>
-                <th>Columna</th>
-                <th>Tipo</th>
-                <th>Descripción</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td><code>ENTIDAD</code></td><td><span class="badge badge-azul" style="font-size:10px">texto</span></td><td>Nombre del estado federativo</td></tr>
-              <tr><td><code>MUNICIPIO</code></td><td><span class="badge badge-azul" style="font-size:10px">texto</span></td><td>Nombre del municipio</td></tr>
-              <tr><td><code>CLUES</code></td><td><span class="badge badge-azul" style="font-size:10px">texto</span></td><td>Clave única del establecimiento</td></tr>
-              <tr><td><code>MES</code></td><td><span class="badge badge-verde" style="font-size:10px">entero</span></td><td>Mes del registro (1–12)</td></tr>
-              <tr><td><code>ANIO</code></td><td><span class="badge badge-verde" style="font-size:10px">entero</span></td><td>Año del registro</td></tr>
-              <tr><td><code>VBC01–03</code></td><td><span class="badge badge-naranja" style="font-size:10px">numérico</span></td><td>Dosis BCG (tuberculosis)</td></tr>
-              <tr><td><code>VHB01–06</code></td><td><span class="badge badge-naranja" style="font-size:10px">numérico</span></td><td>Dosis Hepatitis B</td></tr>
-              <tr><td><code>VPH01–04</code></td><td><span class="badge badge-naranja" style="font-size:10px">numérico</span></td><td>Dosis VPH (Papiloma)</td></tr>
-              <tr><td><code>VRV01–04</code></td><td><span class="badge badge-naranja" style="font-size:10px">numérico</span></td><td>Dosis Rotavirus</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="card light anim-item">
-            <span class="card-icon">🔢</span>
-            <div class="card-title">Escala del archivo</div>
-            <div class="card-body">
-              Archivos de hasta <strong>+50,000 filas</strong> por año.<br/>
-              Procesados en <strong>chunks de 10,000 registros</strong> para optimizar memoria y evitar fragmentación del DataFrame.
-            </div>
-          </div>
-          <div class="card light anim-item">
-            <span class="card-icon">🗂️</span>
-            <div class="card-title">Soporte Multi-hoja</div>
-            <div class="card-body">
-              El sistema detecta y lista todas las hojas de un archivo <code>.xlsx</code>.
-              El usuario selecciona la hoja a procesar desde un ComboBox.
-            </div>
-          </div>
-          <div class="card light anim-item">
-            <span class="card-icon">🔄</span>
-            <div class="card-title">Homogeneización de estados</div>
-            <div class="card-body">
-              Diccionario de <strong>100+ variantes</strong> de nombres de estados mexicanos:
-              <code>ags</code>, <code>Aguascalientes</code>, <code>AGS</code>, <code>oax</code>... → nombre canónico normalizado.
-            </div>
-          </div>
-          <div class="card light anim-item">
-            <span class="card-icon">📤</span>
-            <div class="card-title">Exportación disponible</div>
-            <div class="card-body">
-              Los datos procesados pueden exportarse en <strong>CSV</strong> o como reporte de texto <strong>TXT</strong> con estadísticas, columnas y resumen de homogeneización.
-            </div>
-          </div>
+          <div class="t-sm c-ink" style="margin-bottom:5px">Sin indicadores en tiempo real</div>
+          <div class="body-s c-muted">Nadie sabe cuántas dosis se aplicaron, qué municipios están rezagados ni cuántos establecimientos siguen activos.</div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ══════════════════════════════ SLIDE 6 FUENTES EXTERNAS ══ -->
-  <div class="slide slide-dark" data-index="5">
-    <div class="slide-header">
-      <div class="icon">🌐</div>
-      <div>
-        <h2>Fuentes de Datos Externas</h2>
-        <p>Datos no estructurados + persistencia en la nube</p>
-      </div>
-    </div>
-    <div class="body">
-      <div class="two-col" style="align-items:start">
+      <div class="ai" style="display:flex;gap:16px;align-items:flex-start;background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+        <div class="sc" style="background:#5B2D8E">3</div>
         <div>
-          <h3 style="color:var(--verde2);font-size:17px;font-weight:700;margin-bottom:16px">📎 Datos No Estructurados</h3>
-          <p style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:18px">
-            El sistema acepta archivos complementarios de tipo libre que enriquecen el análisis. Son opcionales y se integran como contexto textual en el módulo MOSTRAR.
-          </p>
-
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="card anim-item" style="background:rgba(0,82,155,.12);border-color:rgba(0,82,155,.3);flex-direction:row;align-items:center;display:flex;gap:14px;padding:16px">
-              <span style="font-size:32px">📄</span>
-              <div>
-                <div class="card-title" style="font-size:14px">Archivos TXT</div>
-                <div class="card-body">Reportes narrativos, notas epidemiológicas, minutas. Leídos completos como texto plano.</div>
-              </div>
-            </div>
-            <div class="card anim-item" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);flex-direction:row;align-items:center;display:flex;gap:14px;padding:16px">
-              <span style="font-size:32px">🔧</span>
-              <div>
-                <div class="card-title" style="font-size:14px">Archivos JSON</div>
-                <div class="card-body">Configuraciones de campañas, metadatos de vacunas, catálogos de CLUES. Deserializados y formateados.</div>
-              </div>
-            </div>
-            <div class="card anim-item" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);flex-direction:row;align-items:center;display:flex;gap:14px;padding:16px">
-              <span style="font-size:32px">📑</span>
-              <div>
-                <div class="card-title" style="font-size:14px">Archivos PDF</div>
-                <div class="card-body">Boletines epidemiológicos, lineamientos de vacunación, informes oficiales. Soporte integrado en el selector.</div>
-              </div>
-            </div>
-          </div>
+          <div class="t-sm c-ink" style="margin-bottom:5px">Datos atrapados localmente</div>
+          <div class="body-s c-muted">Sin base de datos central, la información no tiene respaldo ni se puede rastrear históricamente.</div>
         </div>
+      </div>
 
+      <div class="ai" style="display:flex;gap:16px;align-items:flex-start;background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+        <div class="sc">4</div>
         <div>
-          <h3 style="color:#a78bfa;font-size:17px;font-weight:700;margin-bottom:16px">🍃 MongoDB Atlas (Fuente Cloud)</h3>
-          <p style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:16px">
-            Base de datos NoSQL en la nube para persistencia, trazabilidad y análisis histórico. Actúa como fuente de datos externa reutilizable.
-          </p>
-
-          <div style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);border-radius:14px;padding:20px;margin-bottom:14px" class="anim-item">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-              <span style="color:#c4b5fd;font-weight:700;font-size:14px">vacunacion_db</span>
-              <span class="badge" style="background:rgba(124,58,237,.2);color:#c4b5fd;font-size:11px">Cluster0</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px 14px">
-                <div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:3px">📦 Collection: <code style="color:#a78bfa">vacunas</code></div>
-                <div style="color:rgba(255,255,255,.5);font-size:12px">Registros individuales de vacunación. Campos adicionales: <code>fecha_insercion</code>, <code>fuente</code>, <code>procesado</code>.</div>
-              </div>
-              <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px 14px">
-                <div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:3px">📋 Collection: <code style="color:#a78bfa">registros_extraccion</code></div>
-                <div style="color:rgba(255,255,255,.5);font-size:12px">Log de cada carga realizada: archivo, fecha, estadísticas, estado.</div>
-              </div>
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="anim-item">
-            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
-              <div style="font-size:22px;margin-bottom:4px">💾</div>
-              <div style="color:#fff;font-size:12px;font-weight:700">Inserción en chunks</div>
-              <div style="color:rgba(255,255,255,.4);font-size:11px">10,000 docs / batch</div>
-            </div>
-            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
-              <div style="font-size:22px;margin-bottom:4px">📡</div>
-              <div style="color:#fff;font-size:12px;font-weight:700">Server API v1</div>
-              <div style="color:rgba(255,255,255,.4);font-size:11px">PyMongo + TLS</div>
-            </div>
-          </div>
+          <div class="t-sm c-ink" style="margin-bottom:5px">Nombres de estados inconsistentes</div>
+          <div class="body-s c-muted">"oax", "OAX", "Oaxaca", "Oaxaca de Juárez" — el mismo estado escrito de 10 formas distintas imposibilita comparar datos.</div>
         </div>
       </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     3 · OBJETIVO
+═══════════════════════════════════════════ -->
+<div class="slide" style="align-items:center;justify-content:center;background:var(--teal);flex-direction:column;position:absolute;inset:0">
+  <!-- fondo geométrico -->
+  <svg viewBox="0 0 1280 720" style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" fill="none">
+    <circle cx="640" cy="360" r="340" stroke="white" stroke-width="2"/>
+    <circle cx="640" cy="360" r="220" stroke="white" stroke-width="1.5"/>
+    <circle cx="640" cy="360" r="110" stroke="white" stroke-width="1"/>
+    <circle cx="640" cy="360" r="28" fill="white"/>
+    <line x1="640" y1="0" x2="640" y2="720" stroke="white" stroke-width="1" stroke-dasharray="6 10"/>
+    <line x1="0" y1="360" x2="1280" y2="360" stroke="white" stroke-width="1" stroke-dasharray="6 10"/>
+  </svg>
+
+  <div style="position:relative;z-index:1;text-align:center;max-width:860px;padding:0 40px">
+    <div class="ai label" style="color:rgba(255,255,255,.6);margin-bottom:16px">03 · Objetivo general</div>
+    <div class="ai t-hero" style="color:#fff;margin-bottom:20px">
+      Unificar, procesar<br/>y visualizar datos de<br/>vacunación nacional
+    </div>
+    <div class="ai" style="font-size:18px;color:rgba(255,255,255,.8);max-width:640px;margin:0 auto 36px;line-height:1.7;font-weight:300">
+      Un pipeline ETL automatizado que convierte archivos desordenados en un dashboard interactivo con indicadores clave para la toma de decisiones en salud pública.
+    </div>
+    <div class="ai" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+      <span class="pill pill-w">Extraer Excel / CSV</span>
+      <span class="pill pill-w">Integrar fuentes externas</span>
+      <span class="pill pill-w">Persistir en MongoDB</span>
+      <span class="pill pill-w">Dashboard con 14 KPIs</span>
+      <span class="pill pill-w">Filtros interactivos</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     4 · ARQUITECTURA
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--navy)">
+  <div style="padding:36px 56px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="label" style="color:rgba(255,255,255,.4);margin-bottom:4px">04 · Sistema</div>
+      <div class="t-lg" style="color:#fff">Arquitectura del Sistema</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <span class="pill pill-dark">dss_vacunacion.py</span>
+      <span class="pill pill-dark">mongodb_connector.py</span>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ SLIDE 7 ETL ══ -->
-  <div class="slide slide-dark" data-index="6">
-    <div class="slide-header">
-      <div class="icon">🔄</div>
-      <div>
-        <h2>Pipeline ETL</h2>
-        <p>Extract → Transform → Load — flujo completo de procesamiento</p>
-      </div>
-    </div>
-    <div class="body">
-      <!-- Analogía simple -->
-      <div style="background:rgba(0,192,127,.08);border:1px solid rgba(0,192,127,.2);border-radius:12px;padding:13px 20px;margin-bottom:20px">
-        <p style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.6">
-          <strong style="color:var(--verde2)">ETL en palabras simples:</strong> como lavar y guardar ropa. Primero la <strong style="color:#60a5fa">recoges del piso</strong> (Extract), luego la <strong style="color:var(--verde2)">lavas y doblas</strong> (Transform), y finalmente la <strong style="color:#a78bfa">guardas en el clóset</strong> (Load).
-        </p>
-      </div>
-      <!-- ETL Flow visual -->
-      <div class="etl-flow" style="margin-bottom:22px" >
-        <div class="etl-step etl-E anim-item">
-          <span class="etl-icon">📥</span>
-          <div class="etl-label">EXTRACT</div>
-          <div class="etl-desc">Lectura de archivos Excel / CSV con Pandas. Detección de hojas, tipos de columnas y fuentes no estructuradas.</div>
-        </div>
-        <div class="etl-arrow">→</div>
-        <div class="etl-step etl-T anim-item">
-          <span class="etl-icon">⚙️</span>
-          <div class="etl-label">TRANSFORM</div>
-          <div class="etl-desc">Clasificación estructurada vs no estructurada. Homogeneización de estados. Limpieza de tipos. Normalización de columnas de dosis.</div>
-        </div>
-        <div class="etl-arrow">→</div>
-        <div class="etl-step etl-L anim-item">
-          <span class="etl-icon">📤</span>
-          <div class="etl-label">LOAD</div>
-          <div class="etl-desc">Inserción en MongoDB Atlas en batches. Registro de log de extracción. Actualización de UI y cálculo de KPIs.</div>
-        </div>
+  <div style="flex:1;padding:24px 56px;display:flex;flex-direction:column;gap:18px">
+
+    <!-- Flujo principal -->
+    <div class="ai" style="display:grid;grid-template-columns:1fr 36px 1fr 36px 1fr 36px 1fr;align-items:center;gap:0">
+
+      <div class="cd" style="text-align:center;padding:18px">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 10px"><rect x="4" y="6" width="24" height="30" rx="4" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><rect x="10" y="3" width="24" height="30" rx="4" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/><line x1="15" y1="15" x2="30" y2="15" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".5"/><line x1="15" y1="21" x2="26" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".4"/></svg>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:4px">Fuentes</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45)">Excel · CSV · TXT · JSON · PDF</div>
       </div>
 
-      <!-- Steps detail -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div class="card anim-item" style="border-top:3px solid var(--azul2)">
-          <span class="card-icon">📂</span>
-          <div class="card-title">Paso 1 — Abrir el archivo</div>
-          <div class="card-body">
-            El usuario selecciona el Excel o CSV. El sistema detecta automáticamente todas las hojas disponibles para que el usuario elija cuál procesar.
-          </div>
-        </div>
-        <div class="card anim-item" style="border-top:3px solid var(--azul2)">
-          <span class="card-icon">🔍</span>
-          <div class="card-title">Paso 2 — Identificar columnas</div>
-          <div class="card-body">
-            Se separan las columnas con datos organizados (estado, municipio, dosis) de las columnas con texto libre o notas, que se tratan aparte.
-          </div>
-        </div>
-        <div class="card anim-item" style="border-top:3px solid var(--azul2)">
-          <span class="card-icon">🗺️</span>
-          <div class="card-title">Paso 3 — Estandarizar nombres</div>
-          <div class="card-body">
-            Un diccionario con <strong style="color:#fff">más de 100 variantes</strong> unifica los nombres: "oax", "OAX" y "Oaxaca" se convierten al nombre oficial correcto.
-          </div>
-        </div>
-        <div class="card anim-item" style="border-top:3px solid #005C3D">
-          <span class="card-icon">📄</span>
-          <div class="card-title">Paso 4 — Leer archivos extra</div>
-          <div class="card-body">
-            Se procesan archivos complementarios (TXT, JSON, PDF) como reportes o notas. Su contenido aparece en la sección de datos no estructurados.
-          </div>
-        </div>
-        <div class="card anim-item" style="border-top:3px solid #005C3D">
-          <span class="card-icon">🧹</span>
-          <div class="card-title">Paso 5 — Limpiar valores</div>
-          <div class="card-body">
-            Se corrigen celdas con texto donde debería haber números. Datos inválidos se descartan automáticamente para garantizar que las sumas sean correctas.
-          </div>
-        </div>
-        <div class="card anim-item" style="border-top:3px solid #7c3aed">
-          <span class="card-icon">🚀</span>
-          <div class="card-title">Paso 6 — Guardar en la nube</div>
-          <div class="card-body">
-            Los datos limpios se suben a MongoDB Atlas en grupos de 10,000. Se registra la fecha, el archivo de origen y un log de auditoría de cada carga.
-          </div>
-        </div>
+      <div style="text-align:center;font-size:22px;color:var(--teal2)">›</div>
+
+      <div class="cd" style="text-align:center;padding:18px;border-color:rgba(0,192,127,.3)">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 10px"><circle cx="20" cy="20" r="16" stroke="rgba(0,192,127,.6)" stroke-width="1.5" fill="rgba(0,192,127,.1)"/><path d="M13 20l5 5 9-9" stroke="#00C07F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:4px">ETL Engine</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45)">Extract · Transform · Load</div>
       </div>
+
+      <div style="text-align:center;font-size:22px;color:var(--teal2)">›</div>
+
+      <div class="cd" style="text-align:center;padding:18px;border-color:rgba(124,58,237,.3)">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 10px"><ellipse cx="20" cy="13" rx="16" ry="7" stroke="#a78bfa" stroke-width="1.5" fill="rgba(124,58,237,.1)"/><path d="M4 13v14c0 3.87 7.16 7 16 7s16-3.13 16-7V13" stroke="#a78bfa" stroke-width="1.5"/></svg>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:4px">MongoDB Atlas</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45)">vacunacion_db</div>
+      </div>
+
+      <div style="text-align:center;font-size:22px;color:var(--teal2)">›</div>
+
+      <div class="cd" style="text-align:center;padding:18px;border-color:rgba(232,147,31,.3)">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 10px"><rect x="4" y="10" width="32" height="22" rx="4" fill="rgba(232,147,31,.12)" stroke="#E8931F" stroke-width="1.5"/><rect x="10" y="22" width="6" height="8" rx="1" fill="#E8931F" opacity=".6"/><rect x="18" y="16" width="6" height="14" rx="1" fill="#E8931F"/><rect x="26" y="24" width="6" height="6" rx="1" fill="#E8931F" opacity=".5"/></svg>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:4px">Dashboard</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45)">14 KPIs + Filtros</div>
+      </div>
+    </div>
+
+    <!-- 4 tarjetas componentes -->
+    <div class="ai g4">
+      <div class="cd">
+        <div class="label" style="color:rgba(255,255,255,.35);margin-bottom:8px">GUI</div>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:5px">Tkinter + ttkbootstrap</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5)">4 pantallas: Extraer, Transformar, Mostrar, Dashboard</div>
+      </div>
+      <div class="cd">
+        <div class="label" style="color:rgba(255,255,255,.35);margin-bottom:8px">Procesamiento</div>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:5px">Pandas DataFrame</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5)">Chunks 10K. Normalización, agrupación, limpieza de tipos.</div>
+      </div>
+      <div class="cd">
+        <div class="label" style="color:rgba(255,255,255,.35);margin-bottom:8px">Visualización</div>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:5px">Matplotlib embebido</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5)">Barras, donuts y series mensuales por cada KPI.</div>
+      </div>
+      <div class="cd">
+        <div class="label" style="color:rgba(255,255,255,.35);margin-bottom:8px">Concurrencia</div>
+        <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:5px">Threading</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5)">ETL en hilo separado. UI nunca se bloquea.</div>
+      </div>
+    </div>
+
+    <div class="ai" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="label" style="color:rgba(255,255,255,.3)">Módulos stdlib:</span>
+      <span class="pill pill-dark">os</span><span class="pill pill-dark">datetime</span><span class="pill pill-dark">threading</span><span class="pill pill-dark">logging</span><span class="pill pill-dark">json</span><span class="pill pill-dark">PyPDF2</span><span class="pill pill-dark">certifi</span>
     </div>
   </div>
+</div>
 
-  <!-- ══════════════════════════════ SLIDE 8 DTL ══ -->
-  <div class="slide slide-light" data-index="7">
-    <div class="slide-header">
-      <div class="icon">🗃️</div>
-      <div>
-        <h2>Datos Tabulares Limpios (DTL)</h2>
-        <p>Resultado del pipeline: datos listos para análisis y visualización</p>
-      </div>
+
+<!-- ═══════════════════════════════════════════
+     5 · FUENTES INTERNAS
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--cream)">
+  <div style="height:6px;background:linear-gradient(90deg,var(--teal),var(--teal2),var(--navy))"></div>
+  <div style="padding:28px 56px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="label c-teal" style="margin-bottom:4px">05 · Datos de entrada</div>
+      <div class="t-lg c-ink">Fuentes de Datos Internas</div>
     </div>
-    <div class="body">
-      <div class="two-col" style="align-items:start">
-        <div>
-          <h3 style="font-size:17px;color:var(--azul);font-weight:700;margin-bottom:14px">¿Qué son los Datos Tabulares Limpios?</h3>
-          <p style="font-size:14px;color:var(--suave);line-height:1.7;margin-bottom:18px">
-            Son la tabla de datos <strong style="color:var(--texto)">ya lista para usar</strong> después del proceso de limpieza: todos los valores numéricos corregidos, los nombres de estados unificados y las columnas bien clasificadas. Con estos datos el sistema puede mostrar la tabla y calcular los indicadores sin ningún paso adicional.
-          </p>
-
-          <div style="background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--borde);box-shadow:0 2px 8px rgba(0,0,0,.06)">
-            <div style="background:var(--azul);padding:10px 16px;font-size:12px;font-weight:700;color:#fff;display:flex;justify-content:space-between">
-              <span>DataFrame — DSS-VacOaxaca</span>
-              <span style="color:rgba(255,255,255,.6)">Pandas v2.x</span>
-            </div>
-            <div style="padding:12px 16px;font-family:'Consolas',monospace;font-size:12px;color:var(--texto);background:#f8fafc">
-              <div style="color:var(--verde);font-weight:700;margin-bottom:6px"># Columnas disponibles</div>
-              <div>ENTIDAD  MUNICIPIO  CLUES  MES  ANIO</div>
-              <div>VBC01    VBC02      VBC03</div>
-              <div>VHB01    VHB02  ...  VHB06</div>
-              <div>VPH01    VPH02      VPH03  VPH04</div>
-              <div>VRV01    VRV02      VRV03  VRV04</div>
-              <div style="margin-top:8px;color:var(--verde);font-weight:700"># Metadatos MongoDB</div>
-              <div>fecha_insercion  fuente  procesado</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="card light anim-item">
-            <div style="display:flex;gap:12px;align-items:center">
-              <span style="font-size:28px">🔵</span>
-              <div>
-                <div class="card-title">Columnas estructuradas</div>
-                <div class="card-body">Identidad: ENTIDAD, MUNICIPIO, CLUES, MES, ANIO. Tipos numéricos o categóricos bien definidos. Permiten agrupación, filtro y búsqueda.</div>
-              </div>
-            </div>
-          </div>
-          <div class="card light anim-item">
-            <div style="display:flex;gap:12px;align-items:center">
-              <span style="font-size:28px">🟠</span>
-              <div>
-                <div class="card-title">Columnas de dosis (numérico)</div>
-                <div class="card-body">Todas las columnas VAC/BIO/BIE/V* que no son de identidad. Se suman para KPIs. Se normalizan con <code>pd.to_numeric(errors='coerce')</code>.</div>
-              </div>
-            </div>
-          </div>
-          <div class="card light anim-item">
-            <div style="display:flex;gap:12px;align-items:center">
-              <span style="font-size:28px">🟣</span>
-              <div>
-                <div class="card-title">Columnas no estructuradas</div>
-                <div class="card-body">Texto libre que no encaja en el esquema tabular. Se almacenan separadamente y se muestran en la sección expandible de la vista MOSTRAR.</div>
-              </div>
-            </div>
-          </div>
-          <div class="card light anim-item" style="background:rgba(0,135,90,.06);border-color:rgba(0,135,90,.2)">
-            <div style="display:flex;gap:12px;align-items:center">
-              <span style="font-size:28px">✅</span>
-              <div>
-                <div class="card-title" style="color:var(--verde)">Calidad garantizada</div>
-                <div class="card-body">Los DTL se validan antes de mostrar: sin fragmentación, tipos correctos, estados homogeneizados. Listos para cálculo de KPIs sin preprocesamiento adicional.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <span class="pill pill-teal">SIS · Secretaría de Salud</span>
   </div>
 
-  <!-- ══════════════════════════════ SLIDE 9 LENGUAJE / STACK ══ -->
-  <div class="slide slide-dark" data-index="8">
-    <div class="slide-header">
-      <div class="icon">💻</div>
-      <div>
-        <h2>Stack Tecnológico</h2>
-        <p>Lenguajes, frameworks y librerías utilizadas</p>
-      </div>
-    </div>
-    <div class="body">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px">
-
-        <div class="card anim-item" style="border-top:4px solid #3b82f6;text-align:center">
-          <span class="tech-logo">🐍</span>
-          <div class="card-title" style="font-size:18px;margin-bottom:6px">Python 3.12</div>
-          <div class="card-body">Lenguaje principal. Tipado dinámico, gestión de excepciones, threading nativo, f-strings y comprehensions extensivos.</div>
-          <div style="margin-top:10px">
-            <span class="badge badge-azul">Backend</span>
-            <span class="badge badge-azul">GUI</span>
-            <span class="badge badge-azul">ETL</span>
-          </div>
-        </div>
-
-        <div class="card anim-item" style="border-top:4px solid var(--verde2);text-align:center">
-          <span class="tech-logo">🐼</span>
-          <div class="card-title" style="font-size:18px;margin-bottom:6px">Pandas</div>
-          <div class="card-body">Lectura de Excel/CSV, manipulación de DataFrames, agrupaciones, <code>to_numeric</code>, <code>groupby</code>, <code>nlargest</code>.</div>
-          <div style="margin-top:10px">
-            <span class="badge badge-verde">read_excel</span>
-            <span class="badge badge-verde">groupby</span>
-            <span class="badge badge-verde">chunks</span>
-          </div>
-        </div>
-
-        <div class="card anim-item" style="border-top:4px solid #a78bfa;text-align:center">
-          <span class="tech-logo">🍃</span>
-          <div class="card-title" style="font-size:18px;margin-bottom:6px">PyMongo</div>
-          <div class="card-body">Driver oficial de MongoDB. <code>insert_many()</code>, <code>find()</code>, <code>count_documents()</code>. Server API v1 con TLS.</div>
-          <div style="margin-top:10px">
-            <span class="badge" style="background:rgba(124,58,237,.2);color:#c4b5fd">Atlas</span>
-            <span class="badge" style="background:rgba(124,58,237,.2);color:#c4b5fd">NoSQL</span>
-          </div>
-        </div>
-
-        <div class="card anim-item" style="border-top:4px solid #f59e0b;text-align:center">
-          <span class="tech-logo">🖼️</span>
-          <div class="card-title" style="font-size:18px;margin-bottom:6px">Tkinter + ttkbootstrap</div>
-          <div class="card-body">Framework de interfaz gráfica de escritorio. ttkbootstrap provee temas modernos tipo Bootstrap aplicados a widgets ttk.</div>
-          <div style="margin-top:10px">
-            <span class="badge badge-naranja">Desktop GUI</span>
-            <span class="badge badge-naranja">Responsive</span>
-          </div>
-        </div>
-
-        <div class="card anim-item" style="border-top:4px solid #ec4899;text-align:center">
-          <span class="tech-logo">📈</span>
-          <div class="card-title" style="font-size:18px;margin-bottom:6px">Matplotlib</div>
-          <div class="card-body">Visualizaciones embebidas en la UI con <code>FigureCanvasTkAgg</code>. Barras horizontales, donuts y series mensuales para cada KPI.</div>
-          <div style="margin-top:10px">
-            <span class="badge" style="background:rgba(236,72,153,.15);color:#f9a8d4">Charts</span>
-            <span class="badge" style="background:rgba(236,72,153,.15);color:#f9a8d4">Embebido</span>
-          </div>
-        </div>
-
-        <div class="card anim-item" style="border-top:4px solid #64748b;text-align:center">
-          <span class="tech-logo">🧵</span>
-          <div class="card-title" style="font-size:18px;margin-bottom:6px">Threading</div>
-          <div class="card-body">El procesamiento ETL corre en un hilo separado. La UI permanece responsiva mostrando chips de progreso y barra de estado.</div>
-          <div style="margin-top:10px">
-            <span class="badge badge-gris">Non-blocking</span>
-            <span class="badge badge-gris">Thread-safe UI</span>
-          </div>
-        </div>
-
+  <div style="flex:1;padding:22px 56px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div class="col">
+      <div class="ai body-s c-ink2" style="line-height:1.7">
+        Los archivos provienen del <strong style="color:var(--ink)">Sistema de Información en Salud (SIS)</strong>. Contienen el registro histórico de vacunación por municipio, establecimiento y mes (2010–2026).
       </div>
 
-      <div class="divider"></div>
-      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-        <span style="font-size:13px;color:rgba(255,255,255,.4)">Otros módulos:</span>
-        <span class="badge badge-gris">os</span>
-        <span class="badge badge-gris">datetime</span>
-        <span class="badge badge-gris">time</span>
-        <span class="badge badge-gris">warnings</span>
-        <span class="badge badge-gris">logging</span>
-        <span class="badge badge-gris">json</span>
-        <span class="badge badge-gris">ScrolledText</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ SLIDE 10 MONGODB ══ -->
-  <div class="slide slide-dark" data-index="9">
-    <div class="slide-header">
-      <div class="icon">🍃</div>
-      <div>
-        <h2>Integración MongoDB Atlas</h2>
-        <p>Capa de persistencia NoSQL en la nube</p>
-      </div>
-    </div>
-    <div class="body">
-      <div class="two-col" style="align-items:start">
-        <div>
-          <div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:13px 18px;margin-bottom:16px">
-            <p style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.65">
-              <strong style="color:#c4b5fd">¿Por qué MongoDB?</strong> Los datos de vacunación no siempre tienen las mismas columnas. MongoDB guarda cada registro como un documento flexible, sin necesidad de una estructura rígida. Y al estar en la nube, los datos persisten aunque se cierre la aplicación.
-            </p>
-          </div>
-          <div class="code-block anim-item" style="margin-bottom:18px">
-<span class="kw">class</span> <span class="fn">MongoDBConnector</span>:
-  <span class="kw">def</span> <span class="fn">guardar_datos_vacunas</span>(self, df, fuente):
-    collection = self.db[<span class="str">"vacunas"</span>]
-    <span class="cm"># Inserción por chunks para archivos grandes</span>
-    <span class="kw">for</span> inicio <span class="kw">in</span> range(<span class="num">0</span>, total, <span class="num">10000</span>):
-      chunk = df.iloc[inicio:inicio+<span class="num">10000</span>]
-      datos = chunk.to_dict(<span class="str">'records'</span>)
-      <span class="kw">for</span> reg <span class="kw">in</span> datos:
-        reg[<span class="str">'fecha_insercion'</span>] = datetime.now()
-        reg[<span class="str">'fuente'</span>] = fuente
-        reg[<span class="str">'procesado'</span>] = <span class="kw">False</span>
-      collection.insert_many(datos)
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div class="card anim-item" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.2)">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <span class="card-title" style="color:#c4b5fd">Colección: vacunas</span>
-                <span class="badge" style="background:rgba(124,58,237,.2);color:#c4b5fd">Principal</span>
-              </div>
-              <div class="card-body" style="margin-top:8px">Cada documento representa un registro de vacunación. Campos originales del Excel + <code>fecha_insercion</code>, <code>fuente</code>, <code>procesado</code>.</div>
-            </div>
-            <div class="card anim-item" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.2)">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <span class="card-title" style="color:#c4b5fd">Colección: registros_extraccion</span>
-                <span class="badge" style="background:rgba(124,58,237,.2);color:#c4b5fd">Auditoría</span>
-              </div>
-              <div class="card-body" style="margin-top:8px">Log completo de cada carga: nombre del archivo, fecha, estadísticas de inserción y estado (completada).</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <h3 style="color:var(--verde2);font-size:16px;font-weight:700">Métodos del conector</h3>
-
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div class="anim-item" style="background:rgba(255,255,255,.04);border-left:3px solid var(--verde2);padding:12px 16px;border-radius:0 10px 10px 0">
-              <div style="color:#fff;font-weight:700;font-size:13px;margin-bottom:3px"><code>conectar()</code></div>
-              <div style="color:rgba(255,255,255,.5);font-size:12px">Ping a MongoDB Atlas. Retorna True/False. Se llama en <code>__init__</code>.</div>
-            </div>
-            <div class="anim-item" style="background:rgba(255,255,255,.04);border-left:3px solid var(--azul2);padding:12px 16px;border-radius:0 10px 10px 0">
-              <div style="color:#fff;font-weight:700;font-size:13px;margin-bottom:3px"><code>guardar_datos_vacunas(df, fuente)</code></div>
-              <div style="color:rgba(255,255,255,.5);font-size:12px">Inserta DataFrame en chunks. Retorna stats: registros_insertados, ids, fecha.</div>
-            </div>
-            <div class="anim-item" style="background:rgba(255,255,255,.04);border-left:3px solid #a78bfa;padding:12px 16px;border-radius:0 10px 10px 0">
-              <div style="color:#fff;font-weight:700;font-size:13px;margin-bottom:3px"><code>obtener_datos_vacunas(filtro)</code></div>
-              <div style="color:rgba(255,255,255,.5);font-size:12px">Consulta con filtro opcional. Retorna lista de documentos.</div>
-            </div>
-            <div class="anim-item" style="background:rgba(255,255,255,.04);border-left:3px solid var(--naranja);padding:12px 16px;border-radius:0 10px 10px 0">
-              <div style="color:#fff;font-weight:700;font-size:13px;margin-bottom:3px"><code>registrar_extraccion(archivo, stats)</code></div>
-              <div style="color:rgba(255,255,255,.5);font-size:12px">Guarda log de auditoría en <code>registros_extraccion</code>.</div>
-            </div>
-            <div class="anim-item" style="background:rgba(255,255,255,.04);border-left:3px solid #f59e0b;padding:12px 16px;border-radius:0 10px 10px 0">
-              <div style="color:#fff;font-weight:700;font-size:13px;margin-bottom:3px"><code>obtener_estadisticas()</code></div>
-              <div style="color:rgba(255,255,255,.5);font-size:12px">Retorna conteos: total_registros, procesados, pendientes, total_extracciones.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ SLIDE 11 KPIs ══ -->
-  <div class="slide slide-light" data-index="10">
-    <div class="slide-header">
-      <div class="icon">📊</div>
-      <div>
-        <h2>Dashboard de KPIs</h2>
-        <p>10 Indicadores Clave de Desempeño — calculados en tiempo real</p>
-      </div>
-    </div>
-    <div class="body">
-      <p style="font-size:13px;color:var(--suave);margin-bottom:18px;line-height:1.6">
-        Los indicadores se calculan solos al cargar un archivo. Cada uno muestra un semáforo de colores (verde = bien, amarillo = atención, rojo = alerta) y una gráfica para ver la tendencia de un vistazo.
-      </p>
-      <div class="kpi-grid">
-        <div class="kpi-card verde anim-item">
-          <div class="kpi-num">KPI #1</div>
-          <div class="kpi-title">Total de Dosis Aplicadas</div>
-          <div class="kpi-hint">Suma de todas las columnas de vacunas · Gráfica: Top-5 entidades (hbar)</div>
-        </div>
-        <div class="kpi-card azul anim-item">
-          <div class="kpi-num">KPI #2</div>
-          <div class="kpi-title">Entidades Registradas</div>
-          <div class="kpi-hint">Columna ENTIDAD · n / 32 estados · Donut</div>
-        </div>
-        <div class="kpi-card verde anim-item">
-          <div class="kpi-num">KPI #3</div>
-          <div class="kpi-title">Municipios Cubiertos</div>
-          <div class="kpi-hint">Columna MUNICIPIO · n / 2,469 mun. · Donut</div>
-        </div>
-        <div class="kpi-card azul anim-item">
-          <div class="kpi-num">KPI #4</div>
-          <div class="kpi-title">Establecimientos Activos</div>
-          <div class="kpi-hint">Columna CLUES · Red de unidades de salud · Donut</div>
-        </div>
-        <div class="kpi-card naranja anim-item">
-          <div class="kpi-num">KPI #5</div>
-          <div class="kpi-title">Dosis BCG Aplicadas</div>
-          <div class="kpi-hint">Columnas VBC01–VBC03 · Tuberculosis · Serie mensual</div>
-        </div>
-        <div class="kpi-card naranja anim-item">
-          <div class="kpi-num">KPI #6</div>
-          <div class="kpi-title">Dosis Hepatitis B</div>
-          <div class="kpi-hint">Columnas VHB01–VHB06 · Serie mensual</div>
-        </div>
-        <div class="kpi-card verde anim-item">
-          <div class="kpi-num">KPI #7</div>
-          <div class="kpi-title">Dosis VPH (Papiloma)</div>
-          <div class="kpi-hint">Columnas VPH01–VPH04 · Adolescentes · Serie mensual</div>
-        </div>
-        <div class="kpi-card verde anim-item">
-          <div class="kpi-num">KPI #8</div>
-          <div class="kpi-title">Dosis Rotavirus</div>
-          <div class="kpi-hint">Columnas VRV01–VRV04 · Infantes · Serie mensual</div>
-        </div>
-        <div class="kpi-card azul anim-item">
-          <div class="kpi-num">KPI #9</div>
-          <div class="kpi-title">Meses con Registros</div>
-          <div class="kpi-hint">Columna MES · n / 12 meses · Completitud temporal</div>
-        </div>
-        <div class="kpi-card naranja anim-item">
-          <div class="kpi-num">KPI #10</div>
-          <div class="kpi-title">Promedio Dosis / Establecimiento</div>
-          <div class="kpi-hint">total_dosis / n_establecimientos · Actividad media por CLUES</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ SLIDE 12 SEMÁFOROS ══ -->
-  <div class="slide slide-dark" data-index="11">
-    <div class="slide-header">
-      <div class="icon">🚦</div>
-      <div>
-        <h2>Sistema de Umbrales (Semáforos)</h2>
-        <p>Cada KPI tiene 3 niveles de alerta con colores y etiquetas</p>
-      </div>
-    </div>
-    <div class="body">
-      <p style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:22px;line-height:1.6">
-        Cada indicador se compara automáticamente con rangos definidos y cambia de color según el resultado. Así, cualquier persona puede ver de un vistazo qué está bien, qué necesita atención y qué es urgente, sin necesidad de interpretar números.
-      </p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px">
-        <div class="card anim-item" style="background:rgba(0,135,90,.1);border-color:rgba(0,135,90,.3);text-align:center;padding:28px 20px">
-          <div style="font-size:48px;margin-bottom:12px">🟢</div>
-          <div class="card-title" style="font-size:17px;color:#4ade80">Verde — Óptimo</div>
-          <div class="card-body" style="margin-top:8px">El indicador supera el umbral alto. Ejemplos: &gt;1M dosis, &gt;20 entidades, año completo (12/12 meses).</div>
-        </div>
-        <div class="card anim-item" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);text-align:center;padding:28px 20px">
-          <div style="font-size:48px;margin-bottom:12px">🟡</div>
-          <div class="card-title" style="font-size:17px;color:#fcd34d">Amarillo — Atención</div>
-          <div class="card-body" style="margin-top:8px">Entre umbral medio y alto. Ejemplos: 100K–1M dosis, 10–20 entidades, 6–12 meses de datos.</div>
-        </div>
-        <div class="card anim-item" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);text-align:center;padding:28px 20px">
-          <div style="font-size:48px;margin-bottom:12px">🔴</div>
-          <div class="card-title" style="font-size:17px;color:#fca5a5">Rojo — Alerta</div>
-          <div class="card-body" style="margin-top:8px">Por debajo del umbral mínimo. Requiere acción inmediata. Ejemplos: &lt;100K dosis, &lt;10 entidades.</div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <h3 style="color:rgba(255,255,255,.7);font-size:15px;font-weight:700;margin-bottom:14px">Tabla de umbrales por KPI</h3>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden">
-        <table class="data-table" style="background:transparent">
-          <thead>
-            <tr>
-              <th style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)">KPI</th>
-              <th style="background:rgba(255,255,255,.06);color:#4ade80">🟢 Verde</th>
-              <th style="background:rgba(255,255,255,.06);color:#fcd34d">🟡 Amarillo</th>
-              <th style="background:rgba(255,255,255,.06);color:#fca5a5">🔴 Rojo</th>
-            </tr>
-          </thead>
-          <tbody style="color:rgba(255,255,255,.7)">
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Total Dosis</td><td style="border-color:rgba(255,255,255,.06)">&gt; 1,000,000</td><td style="border-color:rgba(255,255,255,.06)">100K – 1M</td><td style="border-color:rgba(255,255,255,.06)">&lt; 100,000</td></tr>
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Entidades</td><td style="border-color:rgba(255,255,255,.06)">&gt; 20 estados</td><td style="border-color:rgba(255,255,255,.06)">10 – 20</td><td style="border-color:rgba(255,255,255,.06)">&lt; 10</td></tr>
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Municipios</td><td style="border-color:rgba(255,255,255,.06)">&gt; 50</td><td style="border-color:rgba(255,255,255,.06)">20 – 50</td><td style="border-color:rgba(255,255,255,.06)">&lt; 20</td></tr>
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Establecimientos</td><td style="border-color:rgba(255,255,255,.06)">&gt; 100</td><td style="border-color:rgba(255,255,255,.06)">30 – 100</td><td style="border-color:rgba(255,255,255,.06)">&lt; 30</td></tr>
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Dosis BCG / HepB / RV</td><td style="border-color:rgba(255,255,255,.06)">&gt; 50,000</td><td style="border-color:rgba(255,255,255,.06)">5K – 50K</td><td style="border-color:rgba(255,255,255,.06)">&lt; 5,000</td></tr>
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Meses activos</td><td style="border-color:rgba(255,255,255,.06)">12 / 12</td><td style="border-color:rgba(255,255,255,.06)">6 – 12</td><td style="border-color:rgba(255,255,255,.06)">&lt; 6</td></tr>
-            <tr><td style="border-color:rgba(255,255,255,.06);color:rgba(255,255,255,.8)">Prom. Dosis/CLUES</td><td style="border-color:rgba(255,255,255,.06)">&gt; 500 dosis</td><td style="border-color:rgba(255,255,255,.06)">100 – 500</td><td style="border-color:rgba(255,255,255,.06)">&lt; 100</td></tr>
+      <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden">
+        <table class="dt">
+          <thead><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">ENTIDAD</td><td><span class="pill pill-navy" style="padding:2px 8px;font-size:11px">texto</span></td><td class="body-s">Estado federativo (32 entidades)</td></tr>
+            <tr><td class="mono">MUNICIPIO</td><td><span class="pill pill-navy" style="padding:2px 8px;font-size:11px">texto</span></td><td class="body-s">Municipio (2,469 en total)</td></tr>
+            <tr><td class="mono">CLUES</td><td><span class="pill pill-navy" style="padding:2px 8px;font-size:11px">texto</span></td><td class="body-s">Clave única del establecimiento</td></tr>
+            <tr><td class="mono">MES / ANIO</td><td><span class="pill pill-teal" style="padding:2px 8px;font-size:11px">entero</span></td><td class="body-s">Temporalidad del registro</td></tr>
+            <tr><td class="mono">VBC01–03</td><td><span class="pill pill-gold" style="padding:2px 8px;font-size:11px">numérico</span></td><td class="body-s">Dosis BCG (tuberculosis)</td></tr>
+            <tr><td class="mono">VHB01–06</td><td><span class="pill pill-gold" style="padding:2px 8px;font-size:11px">numérico</span></td><td class="body-s">Dosis Hepatitis B</td></tr>
+            <tr><td class="mono">VPH01–04</td><td><span class="pill pill-gold" style="padding:2px 8px;font-size:11px">numérico</span></td><td class="body-s">Dosis VPH (Papiloma)</td></tr>
+            <tr><td class="mono">VRV01–04</td><td><span class="pill pill-gold" style="padding:2px 8px;font-size:11px">numérico</span></td><td class="body-s">Dosis Rotavirus</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════ SLIDE 13 PANTALLAS UI ══ -->
-  <div class="slide slide-light" data-index="12">
-    <div class="slide-header">
-      <div class="icon">🖥️</div>
-      <div>
-        <h2>Pantallas del Sistema</h2>
-        <p>4 vistas navegables con diseño profesional gobierno-salud</p>
+    <div class="col">
+      <!-- mini gráfica SVG placeholder -->
+      <div class="ai cw" style="padding:16px">
+        <svg viewBox="0 0 360 100" fill="none" style="width:100%;margin-bottom:10px">
+          <rect x="10" y="55" width="36" height="43" rx="3" fill="var(--teal)" opacity=".3"/>
+          <rect x="56" y="35" width="36" height="63" rx="3" fill="var(--teal)" opacity=".5"/>
+          <rect x="102" y="18" width="36" height="80" rx="3" fill="var(--teal)"/>
+          <rect x="148" y="30" width="36" height="68" rx="3" fill="var(--teal)" opacity=".7"/>
+          <rect x="194" y="22" width="36" height="76" rx="3" fill="var(--teal)" opacity=".85"/>
+          <rect x="240" y="42" width="36" height="56" rx="3" fill="var(--teal)" opacity=".5"/>
+          <rect x="286" y="60" width="36" height="38" rx="3" fill="var(--teal)" opacity=".35"/>
+          <line x1="0" y1="98" x2="360" y2="98" stroke="var(--border)" stroke-width="1"/>
+        </svg>
+        <div class="t-sm c-ink">+50,000 filas por año</div>
+        <div class="body-s c-muted">Procesadas en chunks de 10,000 registros para optimizar memoria sin fragmentación.</div>
       </div>
-    </div>
-    <div class="body">
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
 
-        <!-- Pantalla 1 -->
-        <div class="card light anim-item" style="padding:0;overflow:hidden">
-          <div style="background:var(--azul);padding:10px 16px;display:flex;align-items:center;gap:10px">
-            <span style="color:var(--verde2);font-weight:800">01</span>
-            <span style="color:#fff;font-weight:700;font-size:14px">EXTRAER</span>
-          </div>
-          <div style="padding:16px">
-            <div style="background:#f8fafc;border-radius:10px;border:1px solid var(--borde);padding:14px;margin-bottom:12px;font-family:monospace;font-size:12px;color:var(--suave)">
-              <div style="color:var(--azul);font-weight:700;margin-bottom:6px">[ Explorar archivo... ]</div>
-              <div>📁 datos_vacunacion_2024.xlsx</div>
-              <div style="margin-top:6px;color:var(--suave)">Hoja: ▼ ENERO_2024</div>
-              <div style="margin-top:10px;background:var(--verde);color:#fff;text-align:center;padding:6px;border-radius:6px;font-weight:700">EXTRAER DATOS</div>
-              <div style="margin-top:10px;border-top:1px dashed var(--borde);padding-top:10px;color:var(--suave)">+ Archivos no estructurados (TXT/JSON/PDF)</div>
-            </div>
-            <ul class="feature-list dark-text">
-              <li><span class="bullet"></span>Selector de archivo + hojas Excel</li>
-              <li><span class="bullet"></span>Archivos complementarios opcionales</li>
-              <li><span class="bullet"></span>Barra de progreso indeterminada</li>
-            </ul>
-          </div>
-        </div>
+      <div class="ai cw">
+        <div class="abar abar-t"></div>
+        <div class="t-sm c-ink" style="margin-bottom:5px">Homogeneización automática</div>
+        <div class="body-s c-muted">Diccionario de <strong style="color:var(--ink)">100+ variantes</strong>: <span class="mono" style="background:#f0f0f0;padding:1px 5px;border-radius:3px">ags</span> → Aguascalientes, <span class="mono" style="background:#f0f0f0;padding:1px 5px;border-radius:3px">OAX</span> → Oaxaca.</div>
+      </div>
 
-        <!-- Pantalla 2 -->
-        <div class="card light anim-item" style="padding:0;overflow:hidden">
-          <div style="background:#005C3D;padding:10px 16px;display:flex;align-items:center;gap:10px">
-            <span style="color:var(--verde2);font-weight:800">02</span>
-            <span style="color:#fff;font-weight:700;font-size:14px">TRANSFORMAR</span>
-          </div>
-          <div style="padding:16px">
-            <div style="background:#f8fafc;border-radius:10px;border:1px solid var(--borde);padding:14px;margin-bottom:12px;text-align:center">
-              <div style="font-size:28px;margin-bottom:6px">⚙️</div>
-              <div style="font-weight:700;color:var(--azul);margin-bottom:8px">Procesando datos...</div>
-              <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-                <span style="background:var(--verde);color:#fff;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700">Extraer</span>
-                <span style="background:var(--verde);color:#fff;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700">Clasificar</span>
-                <span style="background:var(--azul);color:#fff;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700">Homogeneizar</span>
-                <span style="background:#e2e8f0;color:#94a3b8;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700">Cargar ext.</span>
-                <span style="background:#e2e8f0;color:#94a3b8;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700">Limpiar</span>
-                <span style="background:#e2e8f0;color:#94a3b8;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700">Listo</span>
-              </div>
-            </div>
-            <ul class="feature-list dark-text">
-              <li><span class="bullet"></span>Chips de progreso por paso</li>
-              <li><span class="bullet"></span>Barra determinada 0–100%</li>
-              <li><span class="bullet"></span>Hilo separado (UI no se bloquea)</li>
-            </ul>
-          </div>
-        </div>
+      <div class="ai cw">
+        <div class="abar abar-n"></div>
+        <div class="t-sm c-ink" style="margin-bottom:5px">Multi-hoja Excel</div>
+        <div class="body-s c-muted">Detecta todas las hojas de un <span class="mono">.xlsx</span> y las lista en un ComboBox para que el usuario elija.</div>
+      </div>
 
-        <!-- Pantalla 3 -->
-        <div class="card light anim-item" style="padding:0;overflow:hidden">
-          <div style="background:var(--azul);padding:10px 16px;display:flex;align-items:center;gap:10px">
-            <span style="color:var(--verde2);font-weight:800">03</span>
-            <span style="color:#fff;font-weight:700;font-size:14px">MOSTRAR</span>
-          </div>
-          <div style="padding:16px">
-            <div style="background:#f8fafc;border-radius:10px;border:1px solid var(--borde);padding:12px;margin-bottom:12px;font-family:monospace;font-size:11px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                <span style="color:var(--azul);font-weight:700">🔍 Buscar...</span>
-                <span style="color:var(--verde);font-weight:700">↓ CSV  ↓ TXT</span>
-              </div>
-              <div style="background:var(--azul);color:#fff;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border-radius:4px;overflow:hidden;font-size:10px;padding:4px 6px">
-                <span>ENTIDAD</span><span>MUNICIPIO</span><span>MES</span><span>VBC01</span>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;font-size:10px;padding:4px 6px;color:var(--texto)">
-                <span>Oaxaca</span><span>Oaxaca</span><span>1</span><span>342</span>
-              </div>
-              <div style="color:var(--suave);font-size:10px;margin-top:6px">▶ Datos no estructurados (3 archivos)</div>
-            </div>
-            <ul class="feature-list dark-text">
-              <li><span class="bullet"></span>Búsqueda en tiempo real</li>
-              <li><span class="bullet"></span>Exportación CSV y TXT</li>
-              <li><span class="bullet"></span>Sección colapsable no estructurada</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Pantalla 4 -->
-        <div class="card light anim-item" style="padding:0;overflow:hidden">
-          <div style="background:var(--azul);padding:10px 16px;display:flex;align-items:center;gap:10px">
-            <span style="color:var(--verde2);font-weight:800">04</span>
-            <span style="color:#fff;font-weight:700;font-size:14px">DASHBOARD</span>
-          </div>
-          <div style="padding:16px">
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">
-              <div style="background:#f0fdf4;border-left:3px solid var(--verde);border-radius:6px;padding:8px">
-                <div style="font-size:9px;color:var(--suave);font-weight:700">TOTAL DOSIS</div>
-                <div style="font-size:16px;font-weight:900;color:var(--verde)">1.2M</div>
-                <div style="font-size:9px;color:var(--verde)">🟢 Alto volumen</div>
-              </div>
-              <div style="background:#eff6ff;border-left:3px solid var(--azul2);border-radius:6px;padding:8px">
-                <div style="font-size:9px;color:var(--suave);font-weight:700">ENTIDADES</div>
-                <div style="font-size:16px;font-weight:900;color:var(--azul2)">28</div>
-                <div style="font-size:9px;color:var(--azul2)">🟢 Alta cobertura</div>
-              </div>
-              <div style="background:#fff7ed;border-left:3px solid var(--naranja);border-radius:6px;padding:8px">
-                <div style="font-size:9px;color:var(--suave);font-weight:700">MUNICIPIOS</div>
-                <div style="font-size:16px;font-weight:900;color:var(--naranja)">312</div>
-                <div style="font-size:9px;color:var(--naranja)">🟡 Parcial</div>
-              </div>
-            </div>
-            <ul class="feature-list dark-text">
-              <li><span class="bullet"></span>Grid 2 columnas, 10 KPI cards</li>
-              <li><span class="bullet"></span>Gráficas Matplotlib embebidas</li>
-              <li><span class="bullet"></span>Scroll + botón Actualizar</li>
-            </ul>
-          </div>
-        </div>
-
+      <div class="ai cw">
+        <div class="abar abar-g"></div>
+        <div class="t-sm c-ink" style="margin-bottom:5px">Exportación incluida</div>
+        <div class="body-s c-muted">Los datos procesados se exportan como <strong>CSV</strong> o reporte <strong>TXT</strong> con estadísticas completas.</div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ══════════════════════════════ SLIDE 14 FLUJO USUARIO ══ -->
-  <div class="slide slide-dark" data-index="13">
-    <div class="slide-header">
-      <div class="icon">🔀</div>
-      <div>
-        <h2>Flujo de Uso del Sistema</h2>
-        <p>Paso a paso desde la carga hasta el análisis de KPIs</p>
+
+<!-- ═══════════════════════════════════════════
+     6 · PIPELINE ETL
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--cream)">
+  <div style="height:6px;background:linear-gradient(90deg,var(--teal),var(--teal2),var(--navy))"></div>
+  <div style="padding:28px 56px 16px;border-bottom:1px solid var(--border)">
+    <div class="label c-teal" style="margin-bottom:4px">06 · Proceso central</div>
+    <div class="t-lg c-ink">Pipeline ETL</div>
+  </div>
+
+  <div style="flex:1;padding:22px 56px;display:flex;flex-direction:column;gap:18px">
+
+    <!-- Barra ETL -->
+    <div class="ai etl-bar">
+      <div class="etl-b" style="background:var(--navy)">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="5" width="24" height="32" rx="4" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><rect x="10" y="2" width="24" height="32" rx="4" fill="rgba(255,255,255,.09)" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/><line x1="16" y1="16" x2="30" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".5"/><line x1="16" y1="22" x2="26" y2="22" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".4"/></svg>
+        <div style="font-weight:800;font-size:17px;color:#fff;letter-spacing:.06em">EXTRACT</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6)">Lectura con Pandas. Detección de hojas y fuentes externas.</div>
+      </div>
+      <div class="etl-arrow">›</div>
+      <div class="etl-b" style="background:var(--teal)">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke="rgba(255,255,255,.4)" stroke-width="1.5" fill="rgba(255,255,255,.08)"/><path d="M13 20l5.5 5.5 9-10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="font-weight:800;font-size:17px;color:#fff;letter-spacing:.06em">TRANSFORM</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.75)">Clasificación, homogeneización, limpieza de tipos numéricos.</div>
+      </div>
+      <div class="etl-arrow">›</div>
+      <div class="etl-b" style="background:#5B2D8E">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><ellipse cx="20" cy="12" rx="16" ry="7" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="rgba(255,255,255,.08)"/><path d="M4 12v16c0 3.87 7.16 7 16 7s16-3.13 16-7V12" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/></svg>
+        <div style="font-weight:800;font-size:17px;color:#fff;letter-spacing:.06em">LOAD</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.75)">Inserción en MongoDB Atlas en batches de 10K + log de auditoría.</div>
       </div>
     </div>
-    <div class="body">
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;text-align:center;margin-bottom:28px">
-        <div class="anim-item" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div style="width:60px;height:60px;border-radius:50%;background:var(--azul);border:3px solid var(--azul2);display:flex;align-items:center;justify-content:center;font-size:26px">📁</div>
-          <div style="color:#fff;font-size:13px;font-weight:700">1. Seleccionar</div>
-          <div style="color:rgba(255,255,255,.5);font-size:11px">Abrir Excel/CSV + extras opcionales</div>
-        </div>
-        <div class="anim-item" style="display:flex;align-items:center;padding-bottom:30px">
-          <div style="color:var(--verde2);font-size:24px;width:100%;text-align:center">→</div>
-        </div>
-        <div class="anim-item" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div style="width:60px;height:60px;border-radius:50%;background:#005C3D;border:3px solid var(--verde2);display:flex;align-items:center;justify-content:center;font-size:26px">⚙️</div>
-          <div style="color:#fff;font-size:13px;font-weight:700">2. Extraer</div>
-          <div style="color:rgba(255,255,255,.5);font-size:11px">ETL automático en 6 pasos</div>
-        </div>
-        <div class="anim-item" style="display:flex;align-items:center;padding-bottom:30px">
-          <div style="color:var(--verde2);font-size:24px;width:100%;text-align:center">→</div>
-        </div>
-        <div class="anim-item" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div style="width:60px;height:60px;border-radius:50%;background:#7c3aed;border:3px solid #a78bfa;display:flex;align-items:center;justify-content:center;font-size:26px">🍃</div>
-          <div style="color:#fff;font-size:13px;font-weight:700">3. Persistir</div>
-          <div style="color:rgba(255,255,255,.5);font-size:11px">Guardado en MongoDB Atlas</div>
-        </div>
+
+    <!-- 6 pasos -->
+    <div class="ai g3">
+      <div class="cw" style="display:flex;gap:12px;align-items:flex-start">
+        <div class="sc" style="background:var(--navy2)">1</div>
+        <div><div class="t-sm c-ink" style="margin-bottom:4px">Abrir el archivo</div><div class="body-s c-muted">Selector de Excel o CSV. Auto-detección de hojas disponibles.</div></div>
+      </div>
+      <div class="cw" style="display:flex;gap:12px;align-items:flex-start">
+        <div class="sc" style="background:var(--navy2)">2</div>
+        <div><div class="t-sm c-ink" style="margin-bottom:4px">Identificar columnas</div><div class="body-s c-muted">Separar estructuradas (estado, municipio, dosis) de texto libre.</div></div>
+      </div>
+      <div class="cw" style="display:flex;gap:12px;align-items:flex-start">
+        <div class="sc">3</div>
+        <div><div class="t-sm c-ink" style="margin-bottom:4px">Estandarizar nombres</div><div class="body-s c-muted">100+ variantes → nombre oficial canónico con diccionario interno.</div></div>
+      </div>
+      <div class="cw" style="display:flex;gap:12px;align-items:flex-start">
+        <div class="sc">4</div>
+        <div><div class="t-sm c-ink" style="margin-bottom:4px">Leer archivos extra</div><div class="body-s c-muted">TXT, JSON, PDF — contenido en sección de datos no estructurados.</div></div>
+      </div>
+      <div class="cw" style="display:flex;gap:12px;align-items:flex-start">
+        <div class="sc">5</div>
+        <div><div class="t-sm c-ink" style="margin-bottom:4px">Limpiar valores</div><div class="body-s c-muted"><span class="mono" style="background:#f0f0f0;padding:1px 4px;border-radius:3px">to_numeric(errors='coerce')</span> — celdas inválidas se descartan.</div></div>
+      </div>
+      <div class="cw" style="display:flex;gap:12px;align-items:flex-start">
+        <div class="sc" style="background:#5B2D8E">6</div>
+        <div><div class="t-sm c-ink" style="margin-bottom:4px">Guardar en la nube</div><div class="body-s c-muted">Inserción en MongoDB Atlas en grupos de 10,000 con log de auditoría.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     7 · MONGODB
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--navy)">
+  <div style="padding:36px 56px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="label" style="color:rgba(255,255,255,.4);margin-bottom:4px">07 · Persistencia</div>
+      <div class="t-lg" style="color:#fff">Integración MongoDB Atlas</div>
+    </div>
+    <span class="pill" style="background:rgba(124,58,237,.2);color:#c4b5fd;border:1px solid rgba(124,58,237,.3)">vacunacion_db · Cluster0</span>
+  </div>
+
+  <div style="flex:1;padding:24px 56px;display:grid;grid-template-columns:1fr 1fr;gap:28px">
+    <div class="col">
+      <div class="ai" style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:18px">
+        <div class="label" style="color:#c4b5fd;margin-bottom:8px">¿Por qué MongoDB?</div>
+        <div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.65">Los registros de vacunación no siempre tienen las mismas columnas. MongoDB guarda cada fila como un documento flexible. Al estar en la nube, los datos persisten aunque se cierre la aplicación.</div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;text-align:center">
-        <div class="anim-item" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div style="width:60px;height:60px;border-radius:50%;background:#0f172a;border:3px solid #3b82f6;display:flex;align-items:center;justify-content:center;font-size:26px">🔍</div>
-          <div style="color:#fff;font-size:13px;font-weight:700">4. Explorar</div>
-          <div style="color:rgba(255,255,255,.5);font-size:11px">Buscar y filtrar tabla</div>
-        </div>
-        <div class="anim-item" style="display:flex;align-items:center;padding-bottom:30px">
-          <div style="color:var(--verde2);font-size:24px;width:100%;text-align:center">→</div>
-        </div>
-        <div class="anim-item" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div style="width:60px;height:60px;border-radius:50%;background:#0f172a;border:3px solid var(--naranja);display:flex;align-items:center;justify-content:center;font-size:26px">📊</div>
-          <div style="color:#fff;font-size:13px;font-weight:700">5. Analizar KPIs</div>
-          <div style="color:rgba(255,255,255,.5);font-size:11px">Dashboard con semáforos y gráficas</div>
-        </div>
-        <div class="anim-item" style="display:flex;align-items:center;padding-bottom:30px">
-          <div style="color:var(--verde2);font-size:24px;width:100%;text-align:center">→</div>
-        </div>
-        <div class="anim-item" style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <div style="width:60px;height:60px;border-radius:50%;background:#0f172a;border:3px solid var(--verde2);display:flex;align-items:center;justify-content:center;font-size:26px">📤</div>
-          <div style="color:#fff;font-size:13px;font-weight:700">6. Exportar</div>
-          <div style="color:rgba(255,255,255,.5);font-size:11px">CSV o reporte TXT</div>
+      <div class="ai" style="background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;flex:1">
+        <div class="label" style="color:rgba(255,255,255,.3);margin-bottom:10px">Método principal</div>
+        <div style="font-family:'Courier New',monospace;font-size:13px;line-height:1.75;color:#e5e7eb">
+          <span style="color:#ff79c6">class</span> <span style="color:#50fa7b">MongoDBConnector</span>:<br/>
+          &nbsp;&nbsp;<span style="color:#ff79c6">def</span> <span style="color:#50fa7b">guardar_datos</span>(self, df, fuente):<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6272a4"># Chunks para archivos grandes</span><br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">in</span> range(<span style="color:#bd93f9">0</span>, total, <span style="color:#bd93f9">10000</span>):<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chunk = df.iloc[i:i+<span style="color:#bd93f9">10000</span>]<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datos = chunk.to_dict(<span style="color:#f1fa8c">'records'</span>)<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#ff79c6">for</span> reg <span style="color:#ff79c6">in</span> datos:<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reg[<span style="color:#f1fa8c">'fecha_insercion'</span>] = now()<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reg[<span style="color:#f1fa8c">'fuente'</span>] = fuente<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;collection.insert_many(datos)
         </div>
       </div>
+    </div>
 
-      <div class="divider"></div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-        <div class="anim-item" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:24px;margin-bottom:6px">⚡</div>
-          <div style="color:#fff;font-size:12px;font-weight:700">No bloquea UI</div>
-          <div style="color:rgba(255,255,255,.4);font-size:11px">Threading en background</div>
+    <div class="col">
+      <div class="ai label" style="color:rgba(255,255,255,.4)">Colecciones</div>
+      <div class="ai cd" style="border-color:rgba(124,58,237,.3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700;font-size:15px;color:#c4b5fd">vacunas</span>
+          <span class="pill" style="background:rgba(124,58,237,.2);color:#c4b5fd;font-size:11px">Principal</span>
         </div>
-        <div class="anim-item" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:24px;margin-bottom:6px">🔁</div>
-          <div style="color:#fff;font-size:12px;font-weight:700">Recargable</div>
-          <div style="color:rgba(255,255,255,.4);font-size:11px">Botón Actualizar dashboard</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.55)">Campos originales del Excel + <span style="color:#f1fa8c;font-family:monospace">fecha_insercion</span>, <span style="color:#f1fa8c;font-family:monospace">fuente</span>, <span style="color:#f1fa8c;font-family:monospace">procesado</span>.</div>
+      </div>
+      <div class="ai cd" style="border-color:rgba(124,58,237,.3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700;font-size:15px;color:#c4b5fd">registros_extraccion</span>
+          <span class="pill" style="background:rgba(124,58,237,.2);color:#c4b5fd;font-size:11px">Auditoría</span>
         </div>
-        <div class="anim-item" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:24px;margin-bottom:6px">🔍</div>
-          <div style="color:#fff;font-size:12px;font-weight:700">Búsqueda en vivo</div>
-          <div style="color:rgba(255,255,255,.4);font-size:11px">Filtros por tecla</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.55)">Log completo de cada carga: archivo, fecha, estadísticas y estado.</div>
+      </div>
+
+      <div class="ai label" style="color:rgba(255,255,255,.4);margin-top:4px">Métodos del conector</div>
+      <div class="col" style="gap:7px">
+        <div class="ai" style="border-left:3px solid var(--teal2);padding:8px 12px;background:rgba(255,255,255,.04);border-radius:0 8px 8px 0">
+          <span class="mono" style="color:#50fa7b">conectar()</span> <span style="font-size:12px;color:rgba(255,255,255,.45)">— ping a Atlas, retorna True/False</span>
         </div>
-        <div class="anim-item" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:24px;margin-bottom:6px">🕐</div>
-          <div style="color:#fff;font-size:12px;font-weight:700">Reloj en tiempo real</div>
-          <div style="color:rgba(255,255,255,.4);font-size:11px">Actualización cada 1 segundo</div>
+        <div class="ai" style="border-left:3px solid var(--navy2);padding:8px 12px;background:rgba(255,255,255,.04);border-radius:0 8px 8px 0">
+          <span class="mono" style="color:#50fa7b">guardar_datos_vacunas(df, fuente)</span> <span style="font-size:12px;color:rgba(255,255,255,.45)">— inserta en chunks</span>
+        </div>
+        <div class="ai" style="border-left:3px solid #a78bfa;padding:8px 12px;background:rgba(255,255,255,.04);border-radius:0 8px 8px 0">
+          <span class="mono" style="color:#50fa7b">obtener_datos_vacunas(filtro)</span> <span style="font-size:12px;color:rgba(255,255,255,.45)">— consulta con filtro</span>
+        </div>
+        <div class="ai" style="border-left:3px solid var(--gold2);padding:8px 12px;background:rgba(255,255,255,.04);border-radius:0 8px 8px 0">
+          <span class="mono" style="color:#50fa7b">obtener_estadisticas()</span> <span style="font-size:12px;color:rgba(255,255,255,.45)">— conteos: total, procesados, pendientes</span>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ══════════════════════════════ SLIDE 15 CONCLUSIONES ══ -->
-  <div class="slide slide-cover" style="background:linear-gradient(135deg,#001d40,#003A70,#005C3D)" data-index="14">
-    <div style="max-width:900px;margin:0 auto;text-align:center;padding:20px">
-      <div style="font-size:54px;margin-bottom:20px">✅</div>
-      <h1 style="font-size:clamp(22px,3vw,40px);color:#fff;font-weight:800;margin-bottom:20px;line-height:1.3">
-        DSS-VacOaxaca: sistema <span style="color:var(--verde2)">completo, funcional</span><br/>y listo para producción
-      </h1>
 
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;text-align:left">
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px">
-          <div style="font-size:28px;margin-bottom:10px">🔄</div>
-          <div style="color:var(--verde2);font-size:14px;font-weight:700;margin-bottom:6px">Pipeline ETL robusto</div>
-          <div style="color:rgba(255,255,255,.6);font-size:12px;line-height:1.6">6 pasos automatizados. Maneja archivos de +50K registros sin bloquear la interfaz. Chunk insertion optimizado.</div>
+<!-- ═══════════════════════════════════════════
+     8 · STACK TECNOLÓGICO
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--cream)">
+  <div style="height:6px;background:linear-gradient(90deg,var(--teal),var(--teal2),var(--navy))"></div>
+  <div style="padding:28px 56px 16px;border-bottom:1px solid var(--border)">
+    <div class="label c-teal" style="margin-bottom:4px">08 · Tecnologías</div>
+    <div class="t-lg c-ink">Stack Tecnológico</div>
+  </div>
+
+  <div style="flex:1;padding:22px 56px">
+    <div class="g3" style="height:100%">
+
+      <div class="ai cw" style="display:flex;flex-direction:column;gap:10px">
+        <div style="height:80px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="26" fill="rgba(59,110,170,.25)"/><text x="26" y="34" text-anchor="middle" font-size="28" fill="#FFE066" font-family="serif" font-weight="bold">🐍</text></svg>
         </div>
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px">
-          <div style="font-size:28px;margin-bottom:10px">☁️</div>
-          <div style="color:var(--verde2);font-size:14px;font-weight:700;margin-bottom:6px">Persistencia cloud</div>
-          <div style="color:rgba(255,255,255,.6);font-size:12px;line-height:1.6">MongoDB Atlas con trazabilidad completa. Colecciones separadas para datos y auditoría. Escalable.</div>
-        </div>
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px">
-          <div style="font-size:28px;margin-bottom:10px">📊</div>
-          <div style="color:var(--verde2);font-size:14px;font-weight:700;margin-bottom:6px">10 KPIs accionables</div>
-          <div style="color:rgba(255,255,255,.6);font-size:12px;line-height:1.6">Sistema de semáforos, gráficas embebidas y actualización en tiempo real para toma de decisiones.</div>
-        </div>
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px">
-          <div style="font-size:28px;margin-bottom:10px">🌐</div>
-          <div style="color:var(--verde2);font-size:14px;font-weight:700;margin-bottom:6px">Multi-fuente</div>
-          <div style="color:rgba(255,255,255,.6);font-size:12px;line-height:1.6">Excel, CSV, TXT, JSON y PDF integrados en un solo sistema. Datos estructurados y no estructurados unificados.</div>
-        </div>
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px">
-          <div style="font-size:28px;margin-bottom:10px">🗺️</div>
-          <div style="color:var(--verde2);font-size:14px;font-weight:700;margin-bottom:6px">Cobertura nacional</div>
-          <div style="color:rgba(255,255,255,.6);font-size:12px;line-height:1.6">32 entidades, 2,469 municipios. Diccionario de 100+ variantes de nombres. Oaxaca como caso central.</div>
-        </div>
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px">
-          <div style="font-size:28px;margin-bottom:10px">🏛️</div>
-          <div style="color:var(--verde2);font-size:14px;font-weight:700;margin-bottom:6px">Impacto real</div>
-          <div style="color:rgba(255,255,255,.6);font-size:12px;line-height:1.6">Herramienta lista para uso en áreas de salud pública del ITO y dependencias de la Secretaría de Salud.</div>
+        <div class="abar abar-n"></div>
+        <div style="font-weight:800;font-size:18px;color:var(--ink)">Python 3.12</div>
+        <div class="body-s c-muted">Lenguaje principal. Threading nativo, f-strings, gestión de excepciones y comprehensions.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
+          <span class="pill pill-navy">Backend</span><span class="pill pill-teal">GUI</span><span class="pill pill-gold">ETL</span>
         </div>
       </div>
 
-      <div style="font-size:14px;color:rgba(255,255,255,.4)">
-        Instituto Tecnológico de Oaxaca &nbsp;·&nbsp; Ingeniería en Sistemas Computacionales &nbsp;·&nbsp; Octavo Semestre &nbsp;·&nbsp; 2026
+      <div class="ai cw" style="display:flex;flex-direction:column;gap:10px">
+        <div style="height:80px;background:#00393A;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="52" height="36" viewBox="0 0 52 36" fill="none"><rect x="4" y="8" width="44" height="24" rx="4" fill="rgba(255,255,255,.12)"/><rect x="4" y="4" width="44" height="10" rx="3" fill="rgba(255,255,255,.2)"/><line x1="10" y1="20" x2="28" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="27" x2="22" y2="27" stroke="white" stroke-width="2" stroke-linecap="round" opacity=".6"/></svg>
+        </div>
+        <div class="abar abar-t"></div>
+        <div style="font-weight:800;font-size:18px;color:var(--ink)">Pandas</div>
+        <div class="body-s c-muted"><span class="mono" style="background:#f0f0f0;padding:1px 4px;border-radius:3px">read_excel</span>, <span class="mono" style="background:#f0f0f0;padding:1px 4px;border-radius:3px">groupby</span>, <span class="mono" style="background:#f0f0f0;padding:1px 4px;border-radius:3px">nlargest</span> — chunks de 10K.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
+          <span class="pill pill-teal">read_excel</span><span class="pill pill-teal">groupby</span><span class="pill pill-teal">chunks</span>
+        </div>
+      </div>
+
+      <div class="ai cw" style="display:flex;flex-direction:column;gap:10px">
+        <div style="height:80px;background:#1A0533;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="52" height="40" viewBox="0 0 52 40" fill="none"><ellipse cx="26" cy="14" rx="22" ry="10" stroke="#a78bfa" stroke-width="2" fill="rgba(124,58,237,.15)"/><path d="M4 14v12c0 5.52 9.85 10 22 10s22-4.48 22-10V14" stroke="#a78bfa" stroke-width="2"/></svg>
+        </div>
+        <div class="abar" style="background:#a78bfa"></div>
+        <div style="font-weight:800;font-size:18px;color:var(--ink)">PyMongo + Atlas</div>
+        <div class="body-s c-muted"><span class="mono" style="background:#f0f0f0;padding:1px 4px;border-radius:3px">insert_many()</span>, Server API v1 con TLS.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
+          <span class="pill" style="background:rgba(124,58,237,.1);color:#7C3AED">Atlas</span>
+          <span class="pill" style="background:rgba(124,58,237,.1);color:#7C3AED">NoSQL</span>
+          <span class="pill" style="background:rgba(124,58,237,.1);color:#7C3AED">TLS</span>
+        </div>
+      </div>
+
+      <div class="ai cw" style="display:flex;flex-direction:column;gap:10px">
+        <div style="height:80px;background:#2D1B00;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="56" height="40" viewBox="0 0 56 40" fill="none"><rect x="2" y="6" width="52" height="30" rx="4" fill="rgba(232,147,31,.12)" stroke="#E8931F" stroke-width="1.5"/><rect x="2" y="6" width="52" height="10" rx="2" fill="rgba(232,147,31,.2)"/><rect x="8" y="22" width="10" height="12" rx="2" fill="#E8931F" opacity=".5"/><rect x="22" y="16" width="10" height="18" rx="2" fill="#E8931F"/><rect x="36" y="24" width="10" height="10" rx="2" fill="#E8931F" opacity=".6"/></svg>
+        </div>
+        <div class="abar abar-g"></div>
+        <div style="font-weight:800;font-size:18px;color:var(--ink)">Matplotlib</div>
+        <div class="body-s c-muted">Embebido con <span class="mono" style="background:#f0f0f0;padding:1px 4px;border-radius:3px">FigureCanvasTkAgg</span>. Barras, donuts, series.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
+          <span class="pill pill-gold">Charts</span><span class="pill pill-gold">Embebido</span>
+        </div>
+      </div>
+
+      <div class="ai cw" style="display:flex;flex-direction:column;gap:10px">
+        <div style="height:80px;background:#0B1F35;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="56" height="40" viewBox="0 0 56 40" fill="none"><rect x="2" y="6" width="52" height="30" rx="4" fill="rgba(30,108,184,.12)" stroke="#1E6CB8" stroke-width="1.5"/><rect x="2" y="6" width="52" height="9" rx="2" fill="rgba(30,108,184,.25)"/><circle cx="28" cy="25" r="7" fill="rgba(30,108,184,.3)" stroke="#1E6CB8" stroke-width="1.5"/></svg>
+        </div>
+        <div class="abar abar-n"></div>
+        <div style="font-weight:800;font-size:18px;color:var(--ink)">Tkinter + ttkbootstrap</div>
+        <div class="body-s c-muted">GUI de escritorio multiplataforma. Temas modernos tipo Bootstrap.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
+          <span class="pill pill-navy">Desktop</span><span class="pill pill-navy">Scrollable</span>
+        </div>
+      </div>
+
+      <div class="ai cw" style="display:flex;flex-direction:column;gap:10px">
+        <div style="height:80px;background:#1A1A2E;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="56" height="40" viewBox="0 0 56 40" fill="none"><circle cx="20" cy="20" r="12" stroke="#64748B" stroke-width="2" fill="rgba(100,116,139,.08)"/><circle cx="36" cy="20" r="12" stroke="#94A3B8" stroke-width="2" fill="rgba(148,163,184,.08)"/><line x1="20" y1="4" x2="20" y2="36" stroke="#64748B" stroke-width="1.5" stroke-dasharray="3 3"/><line x1="36" y1="4" x2="36" y2="36" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="3 3"/></svg>
+        </div>
+        <div class="abar" style="background:#64748B"></div>
+        <div style="font-weight:800;font-size:18px;color:var(--ink)">Threading</div>
+        <div class="body-s c-muted">ETL en hilo separado. UI permanece responsiva mostrando progreso.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
+          <span class="pill" style="background:#f1f5f9;color:#475569">Non-blocking</span>
+          <span class="pill" style="background:#f1f5f9;color:#475569">Thread-safe</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     9 · DASHBOARD KPIs
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--cream)">
+  <div style="height:6px;background:linear-gradient(90deg,var(--teal),var(--teal2),var(--navy))"></div>
+  <div style="padding:22px 56px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="label c-teal" style="margin-bottom:4px">09 · Indicadores</div>
+      <div class="t-lg c-ink">Dashboard de KPIs</div>
+    </div>
+    <div style="font-size:14px;color:var(--muted)">14 indicadores · tiempo real · semáforo automático · filtros por estado/mes</div>
+  </div>
+
+  <div style="flex:1;padding:18px 56px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;height:100%">
+
+      <div class="ai kc"><div class="n">#01</div><div class="ttl">Total Dosis Aplicadas</div><div class="sub">Suma todas las vacunas · hbar Top-5 entidades</div></div>
+      <div class="ai kc kc-n"><div class="n">#02</div><div class="ttl">Entidades Registradas</div><div class="sub">Columna ENTIDAD · n/32 · Donut</div></div>
+      <div class="ai kc"><div class="n">#03</div><div class="ttl">Municipios Cubiertos</div><div class="sub">Columna MUNICIPIO · n/2,469 · Donut</div></div>
+      <div class="ai kc kc-n"><div class="n">#04</div><div class="ttl">Establecimientos Activos</div><div class="sub">CLUES con ≥1 dosis · Donut</div></div>
+      <div class="ai kc kc-g"><div class="n">#05</div><div class="ttl">Dosis BCG</div><div class="sub">VBC01–03 · Tuberculosis · Serie mensual</div></div>
+
+      <div class="ai kc kc-g"><div class="n">#06</div><div class="ttl">Dosis Hepatitis B</div><div class="sub">VHB01–06 · Serie mensual</div></div>
+      <div class="ai kc"><div class="n">#07</div><div class="ttl">Dosis VPH</div><div class="sub">VPH01–04 · Adolescentes · Serie mensual</div></div>
+      <div class="ai kc kc-n"><div class="n">#08</div><div class="ttl">Dosis Rotavirus</div><div class="sub">VRV01–04 · Infantes · Serie mensual</div></div>
+      <div class="ai kc"><div class="n">#09</div><div class="ttl">Meses con Registros</div><div class="sub">Columna MES · n/12 · Completitud</div></div>
+      <div class="ai kc kc-g"><div class="n">#10</div><div class="ttl">Prom. Dosis / CLUES</div><div class="sub">total ÷ establecimientos · hbar Top-5</div></div>
+
+      <div class="ai kc kc-p"><div class="n">#11</div><div class="ttl">Top Municipios</div><div class="sub">Ranking Top-10 por volumen · hbar</div></div>
+      <div class="ai kc" style="border-left-color:#059669"><div class="n" style="color:#059669">#12</div><div class="ttl">Crecimiento Mensual</div><div class="sub">% variación último vs. mes anterior</div></div>
+      <div class="ai kc kc-n"><div class="n">#13</div><div class="ttl">Cobertura Municipal</div><div class="sub">% municipios con ≥1 dosis · Donut</div></div>
+      <div class="ai kc kc-g"><div class="n">#14</div><div class="ttl">Vacuna Más Demandada</div><div class="sub">BCG vs HepB vs VPH vs Rotavirus · hbar</div></div>
+
+      <div class="ai" style="background:var(--teal-bg);border-radius:10px;border:2px solid var(--teal);padding:12px 14px;display:flex;flex-direction:column;justify-content:center">
+        <div class="label c-teal" style="margin-bottom:5px">Filtros activos</div>
+        <div class="body-s c-ink2">Estado · Municipio · Mes<br/>Todos los KPIs se recalculan al filtrar.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     10 · SEMÁFOROS
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:row">
+
+  <div style="width:440px;background:var(--paper);display:flex;flex-direction:column;justify-content:center;padding:56px 48px;flex-shrink:0;border-right:1px solid var(--border)">
+    <div class="ai label c-teal" style="margin-bottom:12px">10 · Sistema de alertas</div>
+    <div class="ai t-xl c-ink" style="margin-bottom:20px">Semáforos<br/>de KPIs</div>
+    <div class="ai body-s c-muted" style="margin-bottom:28px;line-height:1.7">Cada indicador se compara automáticamente contra rangos predefinidos y cambia de color. Cualquier persona puede detectar problemas de un vistazo, sin necesidad de interpretar números.</div>
+
+    <div class="col ai">
+      <div style="display:flex;gap:14px;align-items:center;background:#fff;border-radius:10px;padding:16px 18px;border:1px solid #D4EDDA">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#00875A"/></svg>
+        <div>
+          <div style="font-weight:700;font-size:15px;color:#00875A;margin-bottom:2px">Verde — Óptimo</div>
+          <div class="body-s c-muted">Supera el umbral alto. Ej: &gt;1M dosis, &gt;20 entidades.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;background:#fff;border-radius:10px;padding:16px 18px;border:1px solid #FEF3C7">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#D97706"/></svg>
+        <div>
+          <div style="font-weight:700;font-size:15px;color:#D97706;margin-bottom:2px">Amarillo — Atención</div>
+          <div class="body-s c-muted">Entre umbral medio y alto. Ej: 100K–1M dosis.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;background:#fff;border-radius:10px;padding:16px 18px;border:1px solid #FEE2E2">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#DC2626"/></svg>
+        <div>
+          <div style="font-weight:700;font-size:15px;color:#DC2626;margin-bottom:2px">Rojo — Alerta</div>
+          <div class="body-s c-muted">Por debajo del mínimo. Requiere acción. Ej: &lt;100K.</div>
+        </div>
       </div>
     </div>
   </div>
 
-</div><!-- /slider -->
+  <div style="flex:1;background:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:40px 48px">
+    <div class="ai label c-muted" style="margin-bottom:14px">Tabla de umbrales por KPI</div>
+    <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden">
+      <table class="dt">
+        <thead>
+          <tr>
+            <th style="background:var(--ink)">KPI</th>
+            <th style="background:#00875A">Verde ✓</th>
+            <th style="background:#D97706">Amarillo !</th>
+            <th style="background:#DC2626">Rojo ✗</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Total Dosis</td><td class="body-s">&gt; 1,000,000</td><td class="body-s">100K – 1M</td><td class="body-s">&lt; 100,000</td></tr>
+          <tr><td>Entidades</td><td class="body-s">&gt; 20 estados</td><td class="body-s">10 – 20</td><td class="body-s">&lt; 10</td></tr>
+          <tr><td>Municipios</td><td class="body-s">&gt; 50</td><td class="body-s">20 – 50</td><td class="body-s">&lt; 20</td></tr>
+          <tr><td>CLUES activos</td><td class="body-s">&gt; 100</td><td class="body-s">30 – 100</td><td class="body-s">&lt; 30</td></tr>
+          <tr><td>BCG / HepB / RV</td><td class="body-s">&gt; 50,000</td><td class="body-s">5K – 50K</td><td class="body-s">&lt; 5,000</td></tr>
+          <tr><td>Meses activos</td><td class="body-s">12 / 12</td><td class="body-s">6 – 12</td><td class="body-s">&lt; 6</td></tr>
+          <tr><td>Prom. / CLUES</td><td class="body-s">&gt; 500 dosis</td><td class="body-s">100 – 500</td><td class="body-s">&lt; 100</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- ejemplo visual de semáforo -->
+    <div class="ai" style="margin-top:20px;background:#fff;border-radius:12px;border:1px solid var(--border);padding:18px">
+      <div class="label c-muted" style="margin-bottom:12px">Ejemplo — Vista de card en el dashboard</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div style="border-left:4px solid #00875A;border-radius:8px;padding:12px 14px;background:#F0FDF4">
+          <div style="font-size:11px;color:var(--muted);font-weight:700">TOTAL DOSIS</div>
+          <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:28px;color:#00875A">1.2M</div>
+          <div style="font-size:12px;color:#00875A;font-weight:600">● Alto volumen</div>
+        </div>
+        <div style="border-left:4px solid #D97706;border-radius:8px;padding:12px 14px;background:#FFFBEB">
+          <div style="font-size:11px;color:var(--muted);font-weight:700">MUNICIPIOS</div>
+          <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:28px;color:#D97706">312</div>
+          <div style="font-size:12px;color:#D97706;font-weight:600">! Cobertura parcial</div>
+        </div>
+        <div style="border-left:4px solid #DC2626;border-radius:8px;padding:12px 14px;background:#FEF2F2">
+          <div style="font-size:11px;color:var(--muted);font-weight:700">DOSIS VPH</div>
+          <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:28px;color:#DC2626">890</div>
+          <div style="font-size:12px;color:#DC2626;font-weight:600">✗ Bajo volumen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<!-- Navigation -->
-<button class="nav-btn hidden" id="prev">‹</button>
-<button class="nav-btn" id="next">›</button>
-<div id="progress-bar" style="width:6.25%"></div>
-<div id="slide-counter">1 / 16</div>
+
+<!-- ═══════════════════════════════════════════
+     11 · PANTALLAS UI
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--navy)">
+  <div style="padding:36px 56px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="label" style="color:rgba(255,255,255,.4);margin-bottom:4px">11 · Interfaz</div>
+      <div class="t-lg" style="color:#fff">Pantallas del Sistema</div>
+    </div>
+    <span class="pill pill-dark">4 vistas navegables</span>
+  </div>
+
+  <div style="flex:1;padding:24px 56px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+
+    <div class="ai" style="background:rgba(26,74,114,.4);border-radius:12px;overflow:hidden">
+      <div style="background:var(--navy2);padding:10px 16px;display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:18px;color:var(--teal2)">01</span>
+        <span style="font-weight:700;font-size:14px;color:#fff;letter-spacing:.08em">EXTRAER</span>
+      </div>
+      <div style="padding:16px 18px;display:flex;gap:16px;align-items:flex-start">
+        <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;border:1px solid rgba(255,255,255,.1);padding:12px;font-family:monospace;font-size:13px;color:rgba(255,255,255,.7)">
+          <div style="color:var(--teal2);font-weight:700;margin-bottom:6px">[ Explorar archivo... ]</div>
+          <div>datos_2024.xlsx</div>
+          <div style="color:rgba(255,255,255,.4);margin-top:4px">Hoja: ▼ ENERO_2024</div>
+          <div style="margin-top:10px;background:var(--teal);color:#fff;text-align:center;padding:6px;border-radius:6px;font-weight:700">EXTRAER DATOS</div>
+          <div style="margin-top:8px;border-top:1px dashed rgba(255,255,255,.1);padding-top:8px;color:rgba(255,255,255,.4)">+ TXT / JSON / PDF</div>
+        </div>
+        <div class="col" style="gap:6px">
+          <div style="font-size:13px;color:rgba(255,255,255,.7)">✔ Selector + hojas</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.7)">✔ Archivos extra</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.7)">✔ Barra progreso</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai" style="background:rgba(0,122,94,.15);border-radius:12px;overflow:hidden;border:1px solid rgba(0,192,127,.2)">
+      <div style="background:var(--teal);padding:10px 16px;display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:18px;color:#fff">02</span>
+        <span style="font-weight:700;font-size:14px;color:#fff;letter-spacing:.08em">TRANSFORMAR</span>
+      </div>
+      <div style="padding:16px 18px;display:flex;gap:16px;align-items:flex-start">
+        <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:10px">Procesando datos...</div>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+            <span style="background:var(--teal);color:#fff;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700">Extraer</span>
+            <span style="background:var(--teal);color:#fff;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700">Clasificar</span>
+            <span style="background:var(--navy);color:#fff;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700">Homogeneizar</span>
+            <span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.4);padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700">Limpiar</span>
+          </div>
+        </div>
+        <div class="col" style="gap:6px">
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">✔ Chips de progreso</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">✔ Barra 0–100%</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">✔ Hilo separado</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai" style="background:rgba(26,74,114,.3);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+      <div style="background:var(--navy2);padding:10px 16px;display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:18px;color:var(--teal2)">03</span>
+        <span style="font-weight:700;font-size:14px;color:#fff;letter-spacing:.08em">MOSTRAR</span>
+      </div>
+      <div style="padding:16px 18px;display:flex;gap:16px;align-items:flex-start">
+        <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;padding:12px;font-family:monospace;font-size:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="color:var(--teal2)">🔍 Buscar...</span>
+            <span style="color:var(--gold2)">↓ CSV</span>
+          </div>
+          <div style="background:var(--navy);color:#fff;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border-radius:4px;padding:4px 6px;font-size:11px">
+            <span>ENTIDAD</span><span>MUNICIPIO</span><span>VBC01</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;padding:4px 6px;color:rgba(255,255,255,.7);font-size:11px">
+            <span>Oaxaca</span><span>Oaxaca</span><span>342</span>
+          </div>
+        </div>
+        <div class="col" style="gap:6px">
+          <div style="font-size:13px;color:rgba(255,255,255,.7)">✔ Búsqueda en vivo</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.7)">✔ Export CSV/TXT</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.7)">✔ Datos no estr.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai" style="background:rgba(184,116,26,.1);border-radius:12px;overflow:hidden;border:1px solid rgba(232,147,31,.25)">
+      <div style="background:var(--gold);padding:10px 16px;display:flex;align-items:center;gap:12px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:18px;color:#fff">04</span>
+        <span style="font-weight:700;font-size:14px;color:#fff;letter-spacing:.08em">DASHBOARD</span>
+      </div>
+      <div style="padding:16px 18px;display:flex;gap:16px;align-items:flex-start">
+        <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+          <div style="background:#fff;border-left:3px solid var(--teal);border-radius:7px;padding:8px 10px">
+            <div style="font-size:10px;color:var(--muted);font-weight:700">TOTAL DOSIS</div>
+            <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--teal)">1.2M</div>
+            <div style="font-size:10px;color:var(--teal)">● Alto volumen</div>
+          </div>
+          <div style="background:#fff;border-left:3px solid var(--navy);border-radius:7px;padding:8px 10px">
+            <div style="font-size:10px;color:var(--muted);font-weight:700">ENTIDADES</div>
+            <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--navy)">28</div>
+            <div style="font-size:10px;color:var(--navy)">● Alta cobertura</div>
+          </div>
+          <div style="background:#fff;border-left:3px solid var(--gold);border-radius:7px;padding:8px 10px">
+            <div style="font-size:10px;color:var(--muted);font-weight:700">MUNICIPIOS</div>
+            <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--gold)">312</div>
+            <div style="font-size:10px;color:var(--gold)">! Parcial</div>
+          </div>
+        </div>
+        <div class="col" style="gap:6px">
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">✔ 14 KPI cards</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">✔ Matplotlib embed</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">✔ Filtros estado/mes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     12 · CONCLUSIONES
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:row">
+
+  <div style="width:420px;background:var(--teal);display:flex;flex-direction:column;justify-content:center;padding:56px 48px;position:relative;overflow:hidden;flex-shrink:0">
+    <div style="position:absolute;top:-100px;right:-100px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.07)"></div>
+    <div style="position:absolute;bottom:-80px;left:-80px;width:220px;height:220px;border-radius:50%;background:rgba(0,0,0,.1)"></div>
+    <div style="position:relative;z-index:1">
+      <div class="ai label" style="color:rgba(255,255,255,.6);margin-bottom:14px">12 · Cierre</div>
+      <div class="ai t-xl" style="color:#fff;margin-bottom:18px">Conclusiones</div>
+      <div class="ai" style="font-size:16px;color:rgba(255,255,255,.82);line-height:1.7;margin-bottom:28px;font-weight:300">
+        DSS-VacOaxaca: sistema completo, funcional y listo para producción en áreas de salud pública.
+      </div>
+      <div class="ai" style="background:rgba(255,255,255,.12);border-radius:12px;padding:18px 20px">
+        <div class="label" style="color:rgba(255,255,255,.55);margin-bottom:8px">Instituto Tecnológico de Oaxaca</div>
+        <div style="font-size:14px;color:rgba(255,255,255,.7)">Ingeniería en Sistemas Computacionales<br/>Octavo Semestre · 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;background:var(--cream);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:16px;padding:32px 48px">
+
+    <div class="ai cw">
+      <div class="abar abar-t"></div>
+      <div class="t-sm c-ink" style="margin-bottom:6px">Pipeline ETL robusto</div>
+      <div class="body-s c-muted">6 pasos automáticos. +50K registros sin bloquear UI. Chunk insertion optimizado para archivos grandes.</div>
+    </div>
+    <div class="ai cw">
+      <div class="abar" style="height:3px;border-radius:2px;margin-bottom:12px;background:#7C3AED"></div>
+      <div class="t-sm c-ink" style="margin-bottom:6px">Persistencia cloud</div>
+      <div class="body-s c-muted">MongoDB Atlas con trazabilidad completa. Colecciones separadas para datos y auditoría. Escalable.</div>
+    </div>
+    <div class="ai cw">
+      <div class="abar abar-g"></div>
+      <div class="t-sm c-ink" style="margin-bottom:6px">14 KPIs accionables</div>
+      <div class="body-s c-muted">Semáforos automáticos, gráficas embebidas, filtros por estado/mes y actualización en tiempo real.</div>
+    </div>
+    <div class="ai cw">
+      <div class="abar abar-n"></div>
+      <div class="t-sm c-ink" style="margin-bottom:6px">Multi-fuente</div>
+      <div class="body-s c-muted">Excel, CSV, TXT, JSON y PDF integrados en un solo flujo. Datos estructurados y no estructurados unificados.</div>
+    </div>
+    <div class="ai cw">
+      <div class="abar abar-t"></div>
+      <div class="t-sm c-ink" style="margin-bottom:6px">Cobertura nacional</div>
+      <div class="body-s c-muted">32 entidades, 2,469 municipios. Diccionario de 100+ variantes de nombres homogeneizados automáticamente.</div>
+    </div>
+    <div class="ai cw" style="background:var(--teal-bg);border-color:rgba(0,122,94,.2)">
+      <div class="abar abar-t"></div>
+      <div class="t-sm c-teal" style="margin-bottom:6px">Impacto real</div>
+      <div class="body-s" style="color:var(--teal)">Herramienta lista para uso en áreas de salud pública del ITO y dependencias de la Secretaría de Salud.</div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     13 · NUEVOS KPIs: ANÁLISIS AVANZADO
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:column;background:var(--cream)">
+  <div style="height:6px;background:linear-gradient(90deg,var(--teal),var(--teal2),var(--navy))"></div>
+  <div style="padding:22px 56px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div class="label c-teal" style="margin-bottom:4px">13 · Nuevas métricas</div>
+      <div class="t-lg c-ink">4 KPIs de Análisis Avanzado</div>
+    </div>
+    <div style="font-size:14px;color:var(--muted)">KPIs 11–14 · agregados en la última versión</div>
+  </div>
+
+  <div style="flex:1;padding:22px 56px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:18px">
+
+    <!-- KPI 11 -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:var(--teal-bg);border:1.5px solid var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="14" y2="6"/><line x1="4" y1="10" x2="18" y2="10"/><line x1="4" y1="14" x2="11" y2="14"/><line x1="4" y1="18" x2="16" y2="18"/></svg>
+        </div>
+        <div>
+          <div class="label c-teal" style="margin-bottom:2px">#11</div>
+          <div class="t-sm c-ink">Top Municipios por Volumen</div>
+        </div>
+      </div>
+      <div class="body-s c-muted" style="line-height:1.65;margin-bottom:14px">Identifica los 10 municipios con mayor número de dosis aplicadas en el periodo seleccionado. Visualización en gráfica de barras horizontales (<strong>hbar</strong>) para comparación inmediata.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill pill-teal">hbar</span>
+        <span class="pill pill-navy">Top-10</span>
+        <span class="pill" style="background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0">Ranking</span>
+      </div>
+    </div>
+
+    <!-- KPI 12 -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:#FFF7ED;border:1.5px solid #F59E0B;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <div>
+          <div class="label" style="color:#F59E0B;margin-bottom:2px">#12</div>
+          <div class="t-sm c-ink">Crecimiento Mensual de Dosis</div>
+        </div>
+      </div>
+      <div class="body-s c-muted" style="line-height:1.65;margin-bottom:14px">Calcula el porcentaje de variación entre el último mes registrado y el mes anterior. Un semáforo de color indica si la tendencia es <span style="color:#059669;font-weight:600">positiva</span>, <span style="color:#D97706;font-weight:600">neutra</span> o <span style="color:#DC2626;font-weight:600">negativa</span>.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill pill-gold">% variación</span>
+        <span class="pill" style="background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0">▲ Verde &gt;5%</span>
+        <span class="pill" style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA">▼ Rojo &lt;-5%</span>
+      </div>
+    </div>
+
+    <!-- KPI 13 -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:#EFF6FF;border:1.5px solid #3B82F6;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 6.36 15.36"/><line x1="12" y1="12" x2="12" y2="3"/></svg>
+        </div>
+        <div>
+          <div class="label" style="color:#3B82F6;margin-bottom:2px">#13</div>
+          <div class="t-sm c-ink">Cobertura Municipal Activa</div>
+        </div>
+      </div>
+      <div class="body-s c-muted" style="line-height:1.65;margin-bottom:14px">Porcentaje de municipios del dataset que registraron al menos una dosis aplicada. Se muestra en gráfica tipo <strong>donut</strong> para destacar la proporción cubierta vs. sin registros.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill pill-navy">Donut</span>
+        <span class="pill" style="background:#EFF6FF;color:#3B82F6;border:1px solid #BFDBFE">% activos</span>
+        <span class="pill pill-teal">n / 2,469</span>
+      </div>
+    </div>
+
+    <!-- KPI 14 -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:#FDF4FF;border:1.5px solid #A855F7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div>
+          <div class="label" style="color:#A855F7;margin-bottom:2px">#14</div>
+          <div class="t-sm c-ink">Vacuna Más Demandada</div>
+        </div>
+      </div>
+      <div class="body-s c-muted" style="line-height:1.65;margin-bottom:14px">Compara el total acumulado de dosis entre BCG, Hepatitis B, VPH y Rotavirus. La vacuna con mayor volumen se resalta automáticamente en la gráfica <strong>hbar</strong> comparativa.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill" style="background:#FAF5FF;color:#A855F7;border:1px solid #E9D5FF">BCG</span>
+        <span class="pill pill-teal">HepB</span>
+        <span class="pill pill-navy">VPH</span>
+        <span class="pill pill-gold">Rotavirus</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     14 · NUEVA FUENTE: IMPORTAR DESDE URL
+═══════════════════════════════════════════ -->
+<div class="slide" style="flex-direction:row;background:var(--navy)">
+
+  <div style="width:460px;display:flex;flex-direction:column;justify-content:center;padding:56px 48px;flex-shrink:0;border-right:1px solid rgba(255,255,255,.1)">
+    <div class="label" style="color:var(--teal2);margin-bottom:12px">14 · Nueva fuente de datos</div>
+    <div class="t-xl" style="color:#fff;margin-bottom:18px;line-height:1.2">Importar<br/>desde URL</div>
+    <div class="body-s" style="color:rgba(255,255,255,.65);line-height:1.75;margin-bottom:28px">El usuario pega cualquier enlace directo a un archivo <strong style="color:#fff">CSV o Excel</strong> (GitHub, Our World in Data, datos.gob.mx, etc.) y el sistema lo descarga automáticamente, lo guarda en un archivo temporal y lo procesa a través del pipeline ETL sin ningún paso adicional.</div>
+
+    <div style="background:rgba(0,192,127,.12);border:1px solid rgba(0,192,127,.35);border-radius:12px;padding:18px 20px">
+      <div class="label" style="color:var(--teal2);margin-bottom:8px">URL de ejemplo para prueba</div>
+      <div style="font-family:'Courier New',monospace;font-size:11px;color:#A7F3D0;word-break:break-all;line-height:1.6">https://raw.githubusercontent.com/<br/>owid/covid-19-data/master/public/<br/>data/vaccinations/country_data/<br/>Mexico.csv</div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 48px;gap:20px">
+
+    <!-- Flujo paso a paso -->
+    <div class="label" style="color:rgba(255,255,255,.5);margin-bottom:4px">Flujo de integración</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.06);border-radius:12px;padding:18px 20px;border:1px solid rgba(255,255,255,.1)">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:14px;color:#fff">1</div>
+        <div>
+          <div class="t-sm" style="color:#fff;margin-bottom:3px">Usuario pega la URL</div>
+          <div class="body-s" style="color:rgba(255,255,255,.55)">Campo de texto en pantalla EXTRAER. Acepta cualquier URL pública que apunte a .csv, .xlsx, .xls o .xlsm.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.06);border-radius:12px;padding:18px 20px;border:1px solid rgba(255,255,255,.1)">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:14px;color:#fff">2</div>
+        <div>
+          <div class="t-sm" style="color:#fff;margin-bottom:3px">Descarga con <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:4px;font-size:12px">requests</code> en hilo separado</div>
+          <div class="body-s" style="color:rgba(255,255,255,.55)">Streaming en chunks de 64 KB. Sin bloquear la interfaz. Barra de estado en tiempo real.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.06);border-radius:12px;padding:18px 20px;border:1px solid rgba(255,255,255,.1)">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:14px;color:#fff">3</div>
+        <div>
+          <div class="t-sm" style="color:#fff;margin-bottom:3px">Archivo temporal → Pipeline ETL</div>
+          <div class="body-s" style="color:rgba(255,255,255,.55)">El archivo se guarda en <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:4px;font-size:12px">tempfile</code> y se inyecta directamente como fuente del pipeline: Extraer → Transformar → Cargar a MongoDB.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:16px;background:rgba(0,192,127,.1);border-radius:12px;padding:18px 20px;border:1px solid rgba(0,192,127,.3)">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--teal2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:14px;color:var(--navy)">4</div>
+        <div>
+          <div class="t-sm" style="color:var(--teal2);margin-bottom:3px">KPIs actualizados automáticamente</div>
+          <div class="body-s" style="color:rgba(255,255,255,.55)">Los datos descargados alimentan el Dashboard con los mismos 14 KPIs, filtros y semáforos que cualquier otra fuente.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+</div><!-- /scaler -->
+
+<!-- Nav -->
+<button class="nav hide" id="prev">‹</button>
+<button class="nav" id="next">›</button>
+<div id="pbar" style="width:8.33%"></div>
+<div id="ctr">1 / 13</div>
 <div id="dots"></div>
 
 <script>
-  const slides = document.querySelectorAll('.slide');
-  const total  = slides.length;
-  let current  = 0;
+// ── Escalar el slide al viewport ──
+function scale(){
+  const el = document.getElementById('scaler');
+  const sx = window.innerWidth  / 1280;
+  const sy = window.innerHeight / 720;
+  const s  = Math.min(sx, sy);
+  el.style.transform = `scale(${s})`;
+}
+scale();
+window.addEventListener('resize', scale);
 
-  // Build dots
-  const dotsEl = document.getElementById('dots');
-  slides.forEach((_, i) => {
-    const d = document.createElement('div');
-    d.className = 'dot' + (i === 0 ? ' active' : '');
-    d.addEventListener('click', () => goTo(i));
-    dotsEl.appendChild(d);
-  });
-  const dots = dotsEl.querySelectorAll('.dot');
+// ── Slider ──
+const slides = document.querySelectorAll('.slide');
+const N = slides.length;
+let cur = 0;
 
-  function updateUI() {
-    // counter
-    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
-    // progress
-    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
-    // nav buttons
-    document.getElementById('prev').classList.toggle('hidden', current === 0);
-    document.getElementById('next').classList.toggle('hidden', current === total - 1);
-    // dots
-    dots.forEach((d, i) => d.classList.toggle('active', i === current));
-  }
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i)=>{
+  const d = document.createElement('div');
+  d.className='dot'+(i===0?' on':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+});
+const dotEls = dotsEl.querySelectorAll('.dot');
 
-  function goTo(idx) {
-    if (idx < 0 || idx >= total || idx === current) return;
-    const prev = slides[current];
-    prev.classList.remove('active');
-    prev.classList.add('exit-left');
-    setTimeout(() => prev.classList.remove('exit-left'), 350);
+function ui(){
+  document.getElementById('ctr').textContent=(cur+1)+' / '+N;
+  document.getElementById('pbar').style.width=((cur+1)/N*100)+'%';
+  document.getElementById('prev').classList.toggle('hide', cur===0);
+  document.getElementById('next').classList.toggle('hide', cur===N-1);
+  dotEls.forEach((d,i)=>d.classList.toggle('on',i===cur));
+}
 
-    current = idx;
-    slides[current].classList.add('active');
-    updateUI();
-  }
+function goTo(idx){
+  if(idx<0||idx>=N||idx===cur) return;
+  slides[cur].classList.remove('active');
+  cur=idx;
+  slides[cur].classList.add('active');
+  ui();
+}
 
-  document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
-  document.getElementById('next').addEventListener('click', () => goTo(current + 1));
+document.getElementById('prev').onclick=()=>goTo(cur-1);
+document.getElementById('next').onclick=()=>goTo(cur+1);
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ')  { e.preventDefault(); goTo(current + 1); }
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); goTo(current - 1); }
-    if (e.key === 'Home') goTo(0);
-    if (e.key === 'End')  goTo(total - 1);
-  });
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' '].includes(e.key)){e.preventDefault();goTo(cur+1);}
+  if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();goTo(cur-1);}
+  if(e.key==='Home') goTo(0);
+  if(e.key==='End')  goTo(N-1);
+});
 
-  // Touch swipe
-  let touchStartX = 0;
-  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  document.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
-  });
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) goTo(cur+(dx<0?1:-1));
+});
 
-  updateUI();
+ui();
 </script>
 </body>
 </html>

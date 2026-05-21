@@ -374,6 +374,63 @@ class DSSVacunacionApp:
         self.btn_extraer.pack(pady=(10, 15))
         self._hover(self.btn_extraer, VERDE_SALUD, "#005C3D")
 
+        # Card de importación desde URL
+        card_url = tk.Frame(center, bg=BLANCO, relief="flat",
+                            highlightbackground=GRIS_BORDE, highlightthickness=1)
+        card_url.pack(fill="x", padx=40, pady=(0, 20))
+
+        card_url_inner = tk.Frame(card_url, bg=BLANCO)
+        card_url_inner.pack(padx=30, pady=25)
+
+        tk.Label(
+            card_url_inner,
+            text="Importar desde URL:",
+            font=("Segoe UI", 9, "bold"),
+            bg=BLANCO, fg=TEXTO_OSCURO
+        ).pack(anchor="w")
+
+        tk.Label(
+            card_url_inner,
+            text="Pega el enlace directo a un archivo CSV o Excel (GitHub, Our World in Data, etc.)",
+            font=("Segoe UI", 8),
+            bg=BLANCO, fg="#7A8499"
+        ).pack(anchor="w", pady=(2, 8))
+
+        self.entry_url = tk.Entry(
+            card_url_inner,
+            font=("Segoe UI", 9),
+            fg="#7A8499", bg="#F5F7FA",
+            relief="flat",
+            highlightbackground=GRIS_BORDE, highlightthickness=1
+        )
+        self.entry_url.insert(0, "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/country_data/Mexico.csv")
+        self.entry_url.pack(fill="x", pady=(0, 10), ipady=7)
+        self.entry_url.bind("<FocusIn>", lambda e: (
+            self.entry_url.delete(0, "end"),
+            self.entry_url.config(fg=TEXTO_OSCURO)
+        ) if self.entry_url.get().startswith("https://raw.github") else None)
+
+        btn_url = tk.Button(
+            card_url_inner,
+            text="Descargar y usar este archivo",
+            font=("Segoe UI", 10, "bold"),
+            bg=AZUL_GOB, fg=BLANCO,
+            relief="flat", cursor="hand2",
+            padx=20, pady=10,
+            command=self.descargar_desde_url
+        )
+        btn_url.pack(fill="x")
+        self._hover(btn_url, AZUL_GOB, "#00529B")
+
+        self.lbl_url_estado = tk.Label(
+            card_url_inner,
+            text="",
+            font=("Segoe UI", 8),
+            bg=BLANCO, fg="#7A8499",
+            wraplength=400, justify="left", anchor="w"
+        )
+        self.lbl_url_estado.pack(fill="x", pady=(6, 0))
+
         # Card de archivos no estructurados adicionales
         card_ne = tk.Frame(center, bg=BLANCO, relief="flat",
                            highlightbackground=GRIS_BORDE, highlightthickness=1)
@@ -689,6 +746,62 @@ class DSSVacunacionApp:
         sep = tk.Frame(frame, bg=GRIS_BORDE, height=1)
         sep.pack(fill="x", padx=15, pady=(8, 0))
 
+        # ── Barra de filtros ─────────────────────
+        filtros_frame = tk.Frame(frame, bg=GRIS_FONDO)
+        filtros_frame.pack(fill="x", padx=15, pady=(6, 2))
+
+        tk.Label(filtros_frame, text="Filtrar por:", font=("Segoe UI", 9, "bold"),
+                 bg=GRIS_FONDO, fg=TEXTO_OSCURO).pack(side="left", padx=(0, 6))
+
+        tk.Label(filtros_frame, text="Estado:", font=("Segoe UI", 9),
+                 bg=GRIS_FONDO, fg="#7A8499").pack(side="left")
+        self._dash_combo_estado = ttk.Combobox(
+            filtros_frame, state="readonly", width=18,
+            font=("Segoe UI", 9)
+        )
+        self._dash_combo_estado.pack(side="left", padx=(2, 10))
+
+        tk.Label(filtros_frame, text="Municipio:", font=("Segoe UI", 9),
+                 bg=GRIS_FONDO, fg="#7A8499").pack(side="left")
+        self._dash_combo_mun = ttk.Combobox(
+            filtros_frame, state="readonly", width=20,
+            font=("Segoe UI", 9)
+        )
+        self._dash_combo_mun.pack(side="left", padx=(2, 10))
+
+        tk.Label(filtros_frame, text="Mes:", font=("Segoe UI", 9),
+                 bg=GRIS_FONDO, fg="#7A8499").pack(side="left")
+        self._dash_combo_mes = ttk.Combobox(
+            filtros_frame, state="readonly", width=10,
+            font=("Segoe UI", 9),
+            values=["Todos", "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        )
+        self._dash_combo_mes.current(0)
+        self._dash_combo_mes.pack(side="left", padx=(2, 10))
+
+        btn_filtrar = tk.Button(
+            filtros_frame, text="Aplicar filtros",
+            font=("Segoe UI", 9, "bold"),
+            bg=AZUL_GOB, fg=BLANCO, relief="flat", cursor="hand2",
+            padx=10, pady=3,
+            command=self.actualizar_dashboard
+        )
+        btn_filtrar.pack(side="left", padx=(0, 6))
+        self._hover(btn_filtrar, AZUL_GOB, "#0A3055")
+
+        btn_limpiar = tk.Button(
+            filtros_frame, text="Limpiar",
+            font=("Segoe UI", 9),
+            bg="#E8ECF3", fg=TEXTO_OSCURO, relief="flat", cursor="hand2",
+            padx=8, pady=3,
+            command=self._limpiar_filtros_dashboard
+        )
+        btn_limpiar.pack(side="left")
+
+        sep2 = tk.Frame(frame, bg=GRIS_BORDE, height=1)
+        sep2.pack(fill="x", padx=15, pady=(4, 0))
+
         # Canvas scrollable
         canvas_frame = tk.Frame(frame, bg=GRIS_FONDO)
         canvas_frame.pack(fill="both", expand=True, padx=15, pady=(6, 10))
@@ -728,6 +841,83 @@ class DSSVacunacionApp:
         )
         self._dash_placeholder.pack(pady=100)
 
+    def _limpiar_filtros_dashboard(self):
+        if hasattr(self, '_dash_combo_estado') and self._dash_combo_estado['values']:
+            self._dash_combo_estado.current(0)
+        if hasattr(self, '_dash_combo_mun') and self._dash_combo_mun['values']:
+            self._dash_combo_mun.current(0)
+        if hasattr(self, '_dash_combo_mes'):
+            self._dash_combo_mes.current(0)
+        self.actualizar_dashboard()
+
+    def _poblar_combos_filtros(self, df):
+        """Llena los combos de estado y municipio con los valores únicos del df."""
+        NO_DOSIS = {"CLAVE_ENTIDAD", "ENTIDAD", "CLAVE_MUNICIPIO", "MUNICIPIO",
+                    "CLUES", "NOMBRE_CLUES", "MES", "ANIO", "FECHA", "_hoja"}
+        def col_exacta(nombre):
+            for c in df.columns:
+                if c.upper() == nombre.upper():
+                    return c
+            return None
+
+        c_ent = col_exacta("ENTIDAD")
+        c_mun = col_exacta("MUNICIPIO")
+
+        if hasattr(self, '_dash_combo_estado'):
+            estados = ["Todos"] + (sorted(df[c_ent].dropna().unique().tolist())
+                                   if c_ent else [])
+            sel = self._dash_combo_estado.get()
+            self._dash_combo_estado["values"] = estados
+            if sel in estados:
+                self._dash_combo_estado.set(sel)
+            else:
+                self._dash_combo_estado.current(0)
+
+        if hasattr(self, '_dash_combo_mun'):
+            muns = ["Todos"] + (sorted(df[c_mun].dropna().unique().tolist())
+                                if c_mun else [])
+            sel = self._dash_combo_mun.get()
+            self._dash_combo_mun["values"] = muns
+            if sel in muns:
+                self._dash_combo_mun.set(sel)
+            else:
+                self._dash_combo_mun.current(0)
+
+    def _df_filtrado(self):
+        """Devuelve el DataFrame filtrado según los combos activos."""
+        df = self.df.copy()
+        def col_exacta(nombre):
+            for c in df.columns:
+                if c.upper() == nombre.upper():
+                    return c
+            return None
+
+        estado_sel = getattr(self, '_dash_combo_estado', None)
+        mun_sel    = getattr(self, '_dash_combo_mun', None)
+        mes_sel    = getattr(self, '_dash_combo_mes', None)
+
+        NOMBRES_MES = ["Ene","Feb","Mar","Abr","May","Jun",
+                       "Jul","Ago","Sep","Oct","Nov","Dic"]
+
+        if estado_sel and estado_sel.get() not in ("Todos", ""):
+            c = col_exacta("ENTIDAD")
+            if c:
+                df = df[df[c] == estado_sel.get()]
+
+        if mun_sel and mun_sel.get() not in ("Todos", ""):
+            c = col_exacta("MUNICIPIO")
+            if c:
+                df = df[df[c] == mun_sel.get()]
+
+        if mes_sel and mes_sel.get() not in ("Todos", ""):
+            mes_num = NOMBRES_MES.index(mes_sel.get()) + 1
+            c = col_exacta("MES")
+            if c:
+                df[c] = pd.to_numeric(df[c], errors="coerce")
+                df = df[df[c] == mes_num]
+
+        return df
+
     # ──────────────────────────────────────────
     #  ACTUALIZAR DASHBOARD
     # ──────────────────────────────────────────
@@ -748,6 +938,7 @@ class DSSVacunacionApp:
             ).pack(pady=100)
             return
 
+        self._poblar_combos_filtros(self.df)
         kpis = self._computar_kpis()
 
         DEFS = [
@@ -841,6 +1032,42 @@ class DSSVacunacionApp:
                              (0,   100,  "#EF4444", "Baja actividad")],
                 "mayor_mejor": True,
             },
+            {
+                "n": 11, "titulo": "Top Municipios por Volumen",
+                "key": "top_municipios", "unidad": " dosis (1er lugar)",
+                "hint": "ranking municipios por total de dosis",
+                "umbrales": [(500_000, None, "#7C3AED", "Muy alto"),
+                             (50_000, 500_000, "#F59E0B", "Alto"),
+                             (0,      50_000,  "#EF4444", "Moderado")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 12, "titulo": "Crecimiento Mensual de Dosis",
+                "key": "crecimiento_mensual", "unidad": "%",
+                "hint": "variación % del último mes vs. mes anterior",
+                "umbrales": [(5,    None, "#00875A", "Crecimiento"),
+                             (-5,   5,   "#F59E0B", "Estable"),
+                             (-9999,-5,  "#EF4444", "Decremento")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 13, "titulo": "Cobertura Municipal Activa",
+                "key": "cobertura_municipal", "unidad": "%",
+                "hint": "municipios con ≥1 dosis / total municipios",
+                "umbrales": [(75, None, "#00875A", "Alta cobertura"),
+                             (40, 75,  "#F59E0B", "Cobertura media"),
+                             (0,  40,  "#EF4444", "Baja cobertura")],
+                "mayor_mejor": True,
+            },
+            {
+                "n": 14, "titulo": "Vacuna Más Demandada",
+                "key": "vacuna_top", "unidad": " dosis",
+                "hint": "vacuna con mayor total acumulado",
+                "umbrales": [(500_000, None, "#0EA5E9", "Alta demanda"),
+                             (50_000, 500_000, "#F59E0B", "Demanda media"),
+                             (0,      50_000,  "#EF4444", "Baja demanda")],
+                "mayor_mejor": True,
+            },
         ]
 
         # Configurar columnas del grid
@@ -860,7 +1087,7 @@ class DSSVacunacionApp:
             )
 
     def _computar_kpis(self):
-        df = self.df
+        df = self._df_filtrado()
         resultado = {}
 
         NO_DOSIS = {
@@ -1051,6 +1278,96 @@ class DSSVacunacionApp:
             }
         else:
             resultado["promedio_clues"] = {"valor": None, "cols": None, "chart": None}
+
+        # ── KPI 11: Top municipios por volumen — hbar top-10 ──
+        chart11 = None
+        top_mun_valor = None
+        if c_mun and cols_dosis:
+            tmp = df[[c_mun] + cols_dosis].copy()
+            for c in cols_dosis:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            ranking = (tmp.groupby(c_mun)[cols_dosis]
+                         .sum().sum(axis=1)
+                         .nlargest(10).sort_values())
+            if not ranking.empty:
+                top_mun_valor = int(ranking.iloc[-1])
+                labels = [str(k)[:16] for k in ranking.index]
+                chart11 = {"type": "hbar", "labels": labels,
+                           "values": [int(v) for v in ranking.values]}
+        resultado["top_municipios"] = {
+            "valor": top_mun_valor,
+            "cols": c_mun,
+            "extra": "Top 10 municipios",
+            "chart": chart11,
+        }
+
+        # ── KPI 12: Crecimiento mensual de dosis ──
+        crecimiento = None
+        chart12 = None
+        if serie_total and len(serie_total) >= 2:
+            meses_ord = sorted(serie_total.keys())
+            ultimo  = serie_total[meses_ord[-1]]
+            penult  = serie_total[meses_ord[-2]]
+            if penult > 0:
+                crecimiento = round((ultimo - penult) / penult * 100, 1)
+            valores_meses = [serie_total.get(m, 0) for m in range(1, 13)]
+            chart12 = {
+                "type": "bar",
+                "labels": NOMBRES_MES,
+                "values": valores_meses,
+            }
+        resultado["crecimiento_mensual"] = {
+            "valor": crecimiento,
+            "cols": c_mes,
+            "extra": "último mes vs. anterior" if crecimiento is not None else "",
+            "chart": chart12,
+        }
+
+        # ── KPI 13: Cobertura municipal activa ──
+        cobertura_pct = None
+        chart13 = None
+        if c_mun and cols_dosis:
+            df_num = df[cols_dosis].apply(pd.to_numeric, errors="coerce")
+            muns_activos = int(df.loc[df_num.sum(axis=1) > 0, c_mun].nunique())
+            total_muns   = int(df[c_mun].nunique())
+            if total_muns > 0:
+                cobertura_pct = round(muns_activos / total_muns * 100, 1)
+            chart13 = {"type": "donut", "value": muns_activos, "total": total_muns,
+                       "label": f"/ {total_muns} mun. en datos"}
+        resultado["cobertura_municipal"] = {
+            "valor": cobertura_pct,
+            "cols": c_mun,
+            "extra": f"{muns_activos} de {total_muns} municipios activos" if cobertura_pct is not None else "",
+            "chart": chart13,
+        }
+
+        # ── KPI 14: Vacuna más demandada ──
+        vacuna_top_valor = None
+        chart14 = None
+        GRUPOS_VAC = {
+            "BCG": cols_prefijo("VBC"),
+            "Hepatitis B": cols_prefijo("VHB"),
+            "VPH": cols_prefijo("VPH"),
+            "Rotavirus": cols_prefijo("VRV"),
+        }
+        totales_vac = {}
+        for nombre_vac, cols_vac in GRUPOS_VAC.items():
+            t = suma_cols(cols_vac)
+            if t:
+                totales_vac[nombre_vac] = t
+        mejor_vac = max(totales_vac, key=totales_vac.get) if totales_vac else None
+        if mejor_vac:
+            vacuna_top_valor = totales_vac[mejor_vac]
+            items_ord = sorted(totales_vac.items(), key=lambda x: x[1])
+            chart14 = {"type": "hbar",
+                       "labels": [k for k, _ in items_ord],
+                       "values": [v for _, v in items_ord]}
+        resultado["vacuna_top"] = {
+            "valor": vacuna_top_valor,
+            "cols": mejor_vac,
+            "extra": f"Líder: {mejor_vac}" if mejor_vac else "",
+            "chart": chart14,
+        }
 
         return resultado
 
@@ -1285,6 +1602,98 @@ class DSSVacunacionApp:
                     self.combo_hoja.current(0)
                 except Exception as e:
                     messagebox.showerror("Error", f"No se pudo leer el archivo:\n{e}")
+
+    def descargar_desde_url(self):
+        url = self.entry_url.get().strip()
+        if not url or url.startswith("https://raw.github") and len(url) < 50:
+            messagebox.showwarning("URL vacía", "Por favor ingresa una URL válida.")
+            return
+
+        self.lbl_url_estado.config(text="Descargando...", fg="#F59E0B")
+        self.update_idletasks()
+
+        def _worker():
+            try:
+                import requests, tempfile, urllib.parse
+                headers = {"User-Agent": "Mozilla/5.0"}
+                resp = requests.get(url, headers=headers, timeout=60, stream=True)
+                resp.raise_for_status()
+
+                # Determinar extensión
+                parsed = urllib.parse.urlparse(url)
+                ext = os.path.splitext(parsed.path)[1].lower() or ".csv"
+                if ext not in (".csv", ".xlsx", ".xls", ".xlsm"):
+                    ext = ".csv"
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+                    for chunk in resp.iter_content(chunk_size=65536):
+                        tmp.write(chunk)
+                    tmp_path = tmp.name
+
+                def _on_ok():
+                    nombre = os.path.basename(parsed.path) or "archivo_url" + ext
+
+                    # Validar columnas mínimas del formato SIS
+                    cols_minimas = {"ENTIDAD", "MUNICIPIO", "CLUES", "MES"}
+                    faltantes = set()
+                    try:
+                        if ext == ".csv":
+                            muestra = pd.read_csv(tmp_path, nrows=1)
+                        else:
+                            muestra = pd.read_excel(tmp_path, nrows=1)
+                        cols_upper = {c.upper() for c in muestra.columns}
+                        faltantes = cols_minimas - cols_upper
+                        if faltantes:
+                            self.lbl_url_estado.config(
+                                text=f"Advertencia: el archivo no tiene el formato SIS esperado "
+                                     f"(faltan: {', '.join(sorted(faltantes))}). "
+                                     f"El archivo se cargó pero puede fallar al extraer.",
+                                fg="#F59E0B"
+                            )
+                            messagebox.showwarning(
+                                "Formato no compatible",
+                                f"El archivo descargado no parece ser un export del SIS de la SSA.\n\n"
+                                f"Columnas faltantes: {', '.join(sorted(faltantes))}\n\n"
+                                f"Se necesitan: ENTIDAD, MUNICIPIO, CLUES, MES, y columnas de dosis "
+                                f"(VBC01, VHB01, VPH01, VRV01...).\n\n"
+                                f"Fuente correcta: exportes del Sistema de Información en Salud (SIS) "
+                                f"de la Secretaría de Salud de México."
+                            )
+                    except Exception:
+                        pass
+
+                    self.archivo_cargado = tmp_path
+                    self.lbl_archivo.config(text=f"[URL] {nombre}", fg=VERDE_SALUD)
+                    if not faltantes:
+                        self.lbl_url_estado.config(
+                            text=f"Descargado correctamente ({os.path.getsize(tmp_path)//1024} KB)",
+                            fg=VERDE_SALUD
+                        )
+                    if ext == ".csv":
+                        self.combo_hoja["values"] = ["(CSV -- hoja unica)"]
+                        self.combo_hoja.current(0)
+                        self.combo_hoja.config(state="disabled")
+                    else:
+                        self.combo_hoja.config(state="readonly")
+                        try:
+                            xl = pd.ExcelFile(tmp_path)
+                            self.combo_hoja["values"] = xl.sheet_names
+                            self.combo_hoja.current(0)
+                        except Exception:
+                            pass
+                    self._set_status(f"Archivo desde URL listo: {nombre}")
+                    self.lbl_resumen_extraccion.config(text="")
+
+                self.after(0, _on_ok)
+
+            except Exception as e:
+                err = str(e)
+                def _on_err(msg=err):
+                    self.lbl_url_estado.config(text=f"Error: {msg}", fg="#EF4444")
+                    messagebox.showerror("Error al descargar", msg)
+                self.after(0, _on_err)
+
+        threading.Thread(target=_worker, daemon=True).start()
 
     def explorar_archivos_no_estructurados(self):
         rutas = filedialog.askopenfilenames(
