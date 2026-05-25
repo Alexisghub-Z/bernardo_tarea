@@ -769,44 +769,97 @@ html,body{
 
 
 <!-- ═══════════════════════════════════════════
-     9 · DASHBOARD KPIs
+     9 · DASHBOARD KPIs (5 PRINCIPALES + FÓRMULAS)
 ═══════════════════════════════════════════ -->
 <div class="slide" style="flex-direction:column;background:var(--cream)">
   <div style="height:6px;background:linear-gradient(90deg,var(--teal),var(--teal2),var(--navy))"></div>
   <div style="padding:22px 56px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
     <div>
       <div class="label c-teal" style="margin-bottom:4px">09 · Indicadores</div>
-      <div class="t-lg c-ink">Dashboard de KPIs</div>
+      <div class="t-lg c-ink">5 KPIs Principales · Fórmulas</div>
     </div>
-    <div style="font-size:14px;color:var(--muted)">14 indicadores · tiempo real · semáforo automático · filtros por estado/mes</div>
+    <div style="font-size:13px;color:var(--muted)">tiempo real · semáforo automático · filtros estado/mes</div>
   </div>
 
-  <div style="flex:1;padding:18px 56px">
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;height:100%">
+  <div style="flex:1;padding:18px 56px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px">
 
-      <div class="ai kc"><div class="n">#01</div><div class="ttl">Total Dosis Aplicadas</div><div class="sub">Suma todas las vacunas · hbar Top-5 entidades</div></div>
-      <div class="ai kc kc-n"><div class="n">#02</div><div class="ttl">Entidades Registradas</div><div class="sub">Columna ENTIDAD · n/32 · Donut</div></div>
-      <div class="ai kc"><div class="n">#03</div><div class="ttl">Municipios Cubiertos</div><div class="sub">Columna MUNICIPIO · n/2,469 · Donut</div></div>
-      <div class="ai kc kc-n"><div class="n">#04</div><div class="ttl">Establecimientos Activos</div><div class="sub">CLUES con ≥1 dosis · Donut</div></div>
-      <div class="ai kc kc-g"><div class="n">#05</div><div class="ttl">Dosis BCG</div><div class="sub">VBC01–03 · Tuberculosis · Serie mensual</div></div>
-
-      <div class="ai kc kc-g"><div class="n">#06</div><div class="ttl">Dosis Hepatitis B</div><div class="sub">VHB01–06 · Serie mensual</div></div>
-      <div class="ai kc"><div class="n">#07</div><div class="ttl">Dosis VPH</div><div class="sub">VPH01–04 · Adolescentes · Serie mensual</div></div>
-      <div class="ai kc kc-n"><div class="n">#08</div><div class="ttl">Dosis Rotavirus</div><div class="sub">VRV01–04 · Infantes · Serie mensual</div></div>
-      <div class="ai kc"><div class="n">#09</div><div class="ttl">Meses con Registros</div><div class="sub">Columna MES · n/12 · Completitud</div></div>
-      <div class="ai kc kc-g"><div class="n">#10</div><div class="ttl">Prom. Dosis / CLUES</div><div class="sub">total ÷ establecimientos · hbar Top-5</div></div>
-
-      <div class="ai kc kc-p"><div class="n">#11</div><div class="ttl">Top Municipios</div><div class="sub">Ranking Top-10 por volumen · hbar</div></div>
-      <div class="ai kc" style="border-left-color:#059669"><div class="n" style="color:#059669">#12</div><div class="ttl">Crecimiento Mensual</div><div class="sub">% variación último vs. mes anterior</div></div>
-      <div class="ai kc kc-n"><div class="n">#13</div><div class="ttl">Cobertura Municipal</div><div class="sub">% municipios con ≥1 dosis · Donut</div></div>
-      <div class="ai kc kc-g"><div class="n">#14</div><div class="ttl">Vacuna Más Demandada</div><div class="sub">BCG vs HepB vs VPH vs Rotavirus · hbar</div></div>
-
-      <div class="ai" style="background:var(--teal-bg);border-radius:10px;border:2px solid var(--teal);padding:12px 14px;display:flex;flex-direction:column;justify-content:center">
-        <div class="label c-teal" style="margin-bottom:5px">Filtros activos</div>
-        <div class="body-s c-ink2">Estado · Municipio · Mes<br/>Todos los KPIs se recalculan al filtrar.</div>
+    <!-- KPI 1 · Volumen -->
+    <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);border-left:5px solid var(--teal);padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:22px;color:var(--teal)">#01</span>
+        <div>
+          <div class="label c-teal" style="margin-bottom:2px">Volumen</div>
+          <div style="font-weight:700;font-size:16px;color:var(--ink)">Total Dosis Aplicadas</div>
+        </div>
       </div>
-
+      <div class="mono" style="font-size:12px;color:var(--teal);background:#F4FBF8;padding:6px 10px;border-radius:6px;border:1px dashed rgba(0,122,94,.3)">total = Σ df[cols_dosis].sum().sum()</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.5">Suma cada columna de dosis (VBC, VHB, VPH, VRV…) y luego suma esos totales — gran total del periodo.</div>
     </div>
+
+    <!-- KPI 2 · Infraestructura -->
+    <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);border-left:5px solid var(--navy);padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:22px;color:var(--navy)">#04</span>
+        <div>
+          <div class="label" style="color:var(--navy);margin-bottom:2px">Infraestructura</div>
+          <div style="font-weight:700;font-size:16px;color:var(--ink)">Establecimientos Activos</div>
+        </div>
+      </div>
+      <div class="mono" style="font-size:12px;color:var(--navy);background:#F1F5F9;padding:6px 10px;border-radius:6px;border:1px dashed rgba(11,45,78,.3)">activos = df[Σdosis &gt; 0]["CLUES"].nunique()</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.5">Filtra filas con al menos una dosis aplicada y cuenta CLUES únicos — clínicas que sí vacunaron.</div>
+    </div>
+
+    <!-- KPI 3 · Productividad -->
+    <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);border-left:5px solid var(--gold);padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:22px;color:var(--gold)">#10</span>
+        <div>
+          <div class="label" style="color:var(--gold);margin-bottom:2px">Productividad</div>
+          <div style="font-weight:700;font-size:16px;color:var(--ink)">Promedio Dosis / CLUES</div>
+        </div>
+      </div>
+      <div class="mono" style="font-size:12px;color:var(--gold);background:#FDF6EC;padding:6px 10px;border-radius:6px;border:1px dashed rgba(184,116,26,.3)">prom = total_dosis / df["CLUES"].nunique()</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.5">Divide el total de dosis entre la cantidad de clínicas únicas — productividad media por establecimiento.</div>
+    </div>
+
+    <!-- KPI 4 · Tendencia -->
+    <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);border-left:5px solid #059669;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:22px;color:#059669">#12</span>
+        <div>
+          <div class="label" style="color:#059669;margin-bottom:2px">Tendencia</div>
+          <div style="font-weight:700;font-size:16px;color:var(--ink)">Crecimiento Mensual</div>
+        </div>
+      </div>
+      <div class="mono" style="font-size:12px;color:#059669;background:#ECFDF5;padding:6px 10px;border-radius:6px;border:1px dashed rgba(5,150,105,.3)">Δ% = (mes_actual − mes_previo) / mes_previo × 100</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.5">Variación porcentual del último mes vs. el anterior — detecta si la operación va al alza o a la baja.</div>
+    </div>
+
+    <!-- KPI 5 · Cobertura -->
+    <div class="ai" style="background:#fff;border-radius:12px;border:1px solid var(--border);border-left:5px solid #7C3AED;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:22px;color:#7C3AED">#13</span>
+        <div>
+          <div class="label" style="color:#7C3AED;margin-bottom:2px">Cobertura</div>
+          <div style="font-weight:700;font-size:16px;color:var(--ink)">Cobertura Municipal</div>
+        </div>
+      </div>
+      <div class="mono" style="font-size:12px;color:#7C3AED;background:#F5F0FE;padding:6px 10px;border-radius:6px;border:1px dashed rgba(124,58,237,.3)">cobertura% = muns_activos / total_muns × 100</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.5">Porcentaje de municipios del dataset que registraron al menos una dosis — métrica clave de alcance territorial.</div>
+    </div>
+
+    <!-- Tile lateral · Filtros / contexto -->
+    <div class="ai" style="background:linear-gradient(135deg,var(--teal),var(--teal2));border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;justify-content:center;color:#fff;position:relative;overflow:hidden">
+      <svg viewBox="0 0 200 200" style="position:absolute;right:-30px;bottom:-30px;width:160px;height:160px;opacity:.12" fill="none">
+        <circle cx="100" cy="100" r="80" stroke="white" stroke-width="3"/>
+        <circle cx="100" cy="100" r="50" stroke="white" stroke-width="2"/>
+        <circle cx="100" cy="100" r="20" fill="white"/>
+      </svg>
+      <div class="label" style="color:rgba(255,255,255,.85);margin-bottom:8px">Recálculo en tiempo real</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:900;font-size:26px;line-height:1.05;margin-bottom:10px">5 KPIs<br/>interactivos</div>
+      <div style="font-size:12px;line-height:1.55;color:rgba(255,255,255,.9)">Cada fórmula se aplica sobre <strong>df_filtrado</strong>. Al cambiar estado, municipio o mes, los cinco valores se recalculan al instante con semáforo automático.</div>
+    </div>
+
   </div>
 </div>
 
